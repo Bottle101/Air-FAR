@@ -1,0 +1,9 @@
+<library path="lib/libnavpoint_rviz_plugin">
+    <class name="rviz/NavpointTool"
+           type="rviz::NavpointTool"
+           base_class_type="rviz::Tool">
+        <description>
+            A tool for sending free space navigation goalpoint to FAR planner
+        </description>
+    </class>
+</library>
