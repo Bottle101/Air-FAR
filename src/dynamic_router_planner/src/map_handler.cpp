@@ -17,7 +17,7 @@ void MapHandler::Init(const MapHandlerParams& params) {
     col_num_ = row_num_;
     level_num_ = std::ceil(map_params_.grid_max_height / map_params_.ceil_height);
     neighbor_Lnum_ = std::ceil(map_params_.sensor_range * 2.0 / map_params_.ceil_length) + 2; 
-    neighbor_Hnum_ = map_params_.neighbor_layers * 2 + 3;
+    neighbor_Hnum_ = map_params_.neighbor_layers * 4 + 3;
     if (level_num_ % 2 == 0) level_num_ ++; // force to odd number, robot will be at center in height
     if (neighbor_Lnum_ % 2 == 0) neighbor_Lnum_ ++; // force to odd number
     // inlitialize grid 
@@ -109,7 +109,7 @@ void MapHandler::GetSurroundObsCloud(const PointCloudPtr& obsCloudOut, const int
     obsCloudOut->clear();
     for (const auto& neighbor_ind : neighbor_indices_) {
         Eigen::Vector3i sub = world_obs_cloud_grid_->Ind2Sub(neighbor_ind);
-        if (layer_id == -1 || sub.z() == layer_id || sub.z() == layer_id+1) {
+        if (layer_id == -1 || sub.z() == layer_id || sub.z() == layer_id+1 || sub.z() == layer_id-1) {
             if (world_obs_cloud_grid_->GetCell(neighbor_ind)->empty()) continue;
             *obsCloudOut += *(world_obs_cloud_grid_->GetCell(neighbor_ind));
         }

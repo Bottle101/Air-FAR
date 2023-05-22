@@ -16,7 +16,7 @@ void DPMaster::Init() {
   odom_sub_          = nh.subscribe("/odom_world", 5, &DPMaster::OdomCallBack, this);
   terrain_sub_       = nh.subscribe("/terrain_cloud", 1, &DPMaster::TerrainCallBack, this);
   scan_sub_          = nh.subscribe("/scan_cloud", 5, &DPMaster::ScanCallBack, this);
-  waypoint_sub_      = nh.subscribe("/goal_point", 1, &DPMaster::WaypointCallBack, this);
+  waypoint_sub_      = nh.subscribe("/goal", 1, &DPMaster::WaypointCallBack, this);
   terrian_local_sub_ = nh.subscribe("/terrain_local_cloud", 1, &DPMaster::TerrainLocalCallBack, this);
   joy_command_sub_   = nh.subscribe("/joy", 5, &DPMaster::JoyCommandCallBack, this);
 
@@ -137,9 +137,11 @@ void DPMaster::Loop() {
 
       /* Extract Vertices and new nodes */
       PointCloudPtr layer_cloud_ptr(new pcl::PointCloud<PCLPoint>());
+      ROS_ERROR("layer_idxs size: %ld", cur_layer_idxs_.size());
       for (const int& layer_idx : cur_layer_idxs_) {
         std::vector<PointStack> realworld_contour;
         map_handler_.GetSurroundObsCloud(layer_cloud_ptr, layer_idx);
+        
         contour_detector_.BuildTerrianImgAndExtractContour(odom_node_ptr_, DPUtil::layerIdx2Height_[layer_idx], layer_cloud_ptr, realworld_contour);
         contour_graph_.UpdateContourGraph(odom_node_ptr_, layer_idx, realworld_contour);
       }
@@ -362,12 +364,13 @@ void DPMaster::LoadROSParams() {
   nh.param<int>(scan_prefix + "inflate_scan_size", scan_params_.inflate_size, 2);
   scan_params_.sensor_range = master_params_.sensor_range;
   scan_params_.voxel_size = master_params_.voxel_dim;
-  scan_params_.ceil_height = DPUtil::kTolerZ * 2.0;
+  scan_params_.ceil_height = DPUtil::kTolerZ * 4.0;
 
   // contour detector params
   nh.param<bool>(cdetect_prefix        + "is_inflate_image", cdetect_params_.is_inflate, true);
   nh.param<bool>(cdetect_prefix        + "is_save_img", cdetect_params_.is_save_img, false);
   nh.param<float>(cdetect_prefix       + "resize_ratio", cdetect_params_.kRatio, 5.0);
+  nh.param<double>(cdetect_prefix       + "approx_eps", cdetect_params_.approx_eps, 0.0005);
   nh.param<int>(cdetect_prefix         + "filter_count_value", cdetect_params_.kThredValue, 10);
   nh.param<int>(cdetect_prefix         + "img_blur_size", cdetect_params_.kBlurSize, 10);
   nh.param<std::string>(cdetect_prefix + "img_folder_path", cdetect_params_.img_path, "");
@@ -539,8 +542,8 @@ void DPMaster::ExtractDynamicObsFromScan(const PointCloudPtr& scanCloudIn,
   scan_handler_.ExtractDyObsCloud(obsCloudIn, dyObsCloudOut);
 }
 
-void DPMaster::WaypointCallBack(const geometry_msgs::PointStampedConstPtr & msg) {
-  Point3D goal_p(msg->point.x, msg->point.y, msg->point.z);
+void DPMaster::WaypointCallBack(const geometry_msgs::PoseStampedConstPtr & msg) {
+  Point3D goal_p(msg->pose.position.x, msg->pose.position.y, msg->pose.position.z);
   const std::string goal_frame = msg->header.frame_id;
   if (!DPUtil::IsSameFrameID(goal_frame, master_params_.world_frame)) {
     ROS_WARN("DPMaster: waypoint published is not on world frame!");

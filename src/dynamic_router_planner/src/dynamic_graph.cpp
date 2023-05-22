@@ -129,6 +129,7 @@ bool DynamicGraph::ExtractGraphNodes(const CTNodeStack& new_ctnodes) {
 void DynamicGraph::UpdateNavGraph(const NodePtrStack& new_nodes,
                                   NodePtrStack& clear_node) 
 {
+    DPUtil::Timer.start_time("clear false positive node detection");
     // clear false positive node detection
     clear_node.clear();
     for (const auto& node_ptr : near_nav_nodes_) {
@@ -141,6 +142,8 @@ void DynamicGraph::UpdateNavGraph(const NodePtrStack& new_nodes,
             this->ReduceDumperCounter(node_ptr);
         }
     }
+    DPUtil::Timer.end_time("clear false positive node detection");
+    DPUtil::Timer.start_time("re-evaluate trajectory edge using terrain planner");
     // re-evaluate trajectory edge using terrain planner
     if (DPUtil::IsTrajectory && cur_internav_ptr_ != NULL) {
         NodePtrStack internav_check_nodes = surround_internav_nodes_;
@@ -158,6 +161,7 @@ void DynamicGraph::UpdateNavGraph(const NodePtrStack& new_nodes,
             }   
         }     
     }
+    DPUtil::Timer.end_time("re-evaluate trajectory edge using terrain planner");
     // check-add connections to odom node with wider near nodes
     NodePtrStack codom_check_list = wide_near_nodes_;
     codom_check_list.insert(codom_check_list.end(), new_nodes.begin(), new_nodes.end());
@@ -173,6 +177,9 @@ void DynamicGraph::UpdateNavGraph(const NodePtrStack& new_nodes,
             this->EraseEdge(conode_ptr, odom_node_ptr_);
         }
     }
+    DPUtil::Timer.start_time("reconnect between near nodes");
+
+    ROS_WARN("DG: Near nodes size: %d", near_nav_nodes_.size());
     // reconnect between near nodes
     for (std::size_t i=0; i<near_nav_nodes_.size(); i++) {
         if (near_nav_nodes_[i]->is_merged || near_nav_nodes_[i]->is_odom) continue;
@@ -207,6 +214,8 @@ void DynamicGraph::UpdateNavGraph(const NodePtrStack& new_nodes,
             }
         }
     }
+    DPUtil::Timer.end_time("reconnect between near nodes");
+    DPUtil::Timer.start_time("Adding edges between existing nodes with new extracted nodes");
     // Adding edges between existing nodes with new extracted nodes
     for (const auto& new_node_ptr : new_nodes) {
         if (!this->IsConnectedNewNode(new_node_ptr)) continue;
@@ -221,6 +230,7 @@ void DynamicGraph::UpdateNavGraph(const NodePtrStack& new_nodes,
             this->UpdateCurInterNavNode(new_node_ptr);
         }
     }
+    DPUtil::Timer.end_time("Adding edges between existing nodes with new extracted nodes");
     this->ClearMergedNodesInGraph();
     // Analysisig frontier nodes
     for (const auto& cnode_ptr : near_nav_nodes_) {

@@ -1,7 +1,7 @@
 #ifndef CONTOUR_DETECTOR_H
 #define CONTOUR_DETECTOR_H
 
-#include "utility.h"
+#include "utilityFAR.h"
 
 
 struct ContourDetectParams {
@@ -9,11 +9,9 @@ struct ContourDetectParams {
     float sensor_range;
     float voxel_dim;
     float kRatio;
-    int kThredValue;
-    int kBlurSize;
-    bool  is_inflate;
+    int   kThredValue;
+    int   kBlurSize;
     bool  is_save_img;
-    double approx_eps;
     std::string img_path;
 };
 
@@ -28,7 +26,6 @@ private:
     std::vector<CVPointStack> refined_contours_;
     std::vector<cv::Vec4i> refined_hierarchy_;
     NavNodePtr odom_node_ptr_;
-    float layer_height_;
 
     int MAT_SIZE, CMAT;
     int MAT_RESIZE, CMAT_RESIZE;
@@ -53,12 +50,13 @@ private:
 
     void TopoFilterContours(std::vector<CVPointStack>& contoursInOut);
 
+    void AdjecentDistanceFilter(std::vector<CVPointStack>& contoursInOut);
+
     /* inline functions */
-    inline void UpdateOdom(const NavNodePtr& odom_node_ptr, const float& layer_height) {
+    inline void UpdateOdom(const NavNodePtr& odom_node_ptr) {
         odom_pos_ = odom_node_ptr->position;
         odom_node_ptr_ = odom_node_ptr;
-        layer_height_ = layer_height;
-        free_odom_resized_ = ConvertPoint3DToCVPoint(DPUtil::free_odom_p, odom_pos_, true);
+        free_odom_resized_ = ConvertPoint3DToCVPoint(FARUtil::free_odom_p, odom_pos_, true);
     }
 
     inline void ConvertCVToPoint3DVector(const CVPointStack& cv_vec,
@@ -126,7 +124,7 @@ private:
                               const bool& is_resized_img=false,
                               const bool& is_crop_idx=true) 
     {
-        const float ratio = is_resized_img ? cd_params_.kRatio : 1.0;
+        const float ratio = is_resized_img ? cd_params_.kRatio : 1.0f;
         const int c_idx = is_resized_img ? CMAT_RESIZE : CMAT;
         row_idx = c_idx + (int)std::round((posIn.x - c_posIn.x) * VOXEL_DIM_INV * ratio);
         col_idx = c_idx + (int)std::round((posIn.y - c_posIn.y) * VOXEL_DIM_INV * ratio);
@@ -159,10 +157,10 @@ private:
                                            const bool& is_resized_img=false) {
         Point3D p;
         const int c_idx = is_resized_img ? CMAT_RESIZE : CMAT;
-        const float ratio = is_resized_img ? cd_params_.kRatio : 1.0;
+        const float ratio = is_resized_img ? cd_params_.kRatio : 1.0f;
         p.x = (cv_p.y - c_idx) * cd_params_.voxel_dim / ratio + c_pos.x;
         p.y = (cv_p.x - c_idx) * cd_params_.voxel_dim / ratio + c_pos.y;
-        p.z = layer_height_;
+        p.z = odom_pos_.z;
         return p;
     }
 
@@ -173,7 +171,7 @@ private:
         std::string filename = std::to_string(img_counter_);
         std::string img_name = cd_params_.img_path + filename + ".tiff";
         cv::imwrite(img_name, img_save);
-        ROS_WARN_THROTTLE(1.0, "CD: image save success!");
+        if (FARUtil::IsDebug) ROS_WARN_THROTTLE(1.0, "CD: image save success!");
         img_counter_ ++;
     }
 
@@ -181,17 +179,11 @@ private:
                                  const cv::Point2f& mid_p,
                                  const cv::Point2f& add_p)
     {
-        cv::Point2f diff_p1 = mid_p - first_p;
+        cv::Point2f diff_p1 = first_p - mid_p;
         cv::Point2f diff_p2 = add_p - mid_p;
-        const float vec1_len = std::hypotf(diff_p1.x, diff_p1.y);
-        const float vec2_len = std::hypotf(diff_p2.x, diff_p2.y);
-        diff_p1 /= vec1_len;
-        diff_p2 /= vec2_len;
-        const float dot_value = diff_p1.dot(diff_p2);
-        if (dot_value >= 1.0 || dot_value <= -1.0) return true;
-        if (abs(dot_value) > ALIGN_ANGLE_COS) return true;
-        const float height = sin(M_PI - acos(dot_value)) * vec1_len;
-        if (height < DIST_LIMIT) return true;
+        diff_p1 /= std::hypotf(diff_p1.x, diff_p1.y);
+        diff_p2 /= std::hypotf(diff_p2.x, diff_p2.y);
+        if (abs(diff_p1.dot(diff_p2)) > ALIGN_ANGLE_COS) return true;
         return false;
     }
 
@@ -238,21 +230,20 @@ public:
      * @param surround_cloud surround obstacle cloud used for updating corner image
      * @param real_world_contour [return] current contour in world frame
     */
-    void BuildTerrianImgAndExtractContour(const NavNodePtr& odom_node_ptr,
-                                          const float& layer_height, 
+    void BuildTerrainImgAndExtractContour(const NavNodePtr& odom_node_ptr, 
                                           const PointCloudPtr& surround_cloud,
                                           std::vector<PointStack>& realworl_contour);
 
+    /**
+     * Show Corners on Pointcloud projection image
+     * @param img_mat pointcloud projection image
+     * @param point_vec corners vector detected from cv corner detector
+    */
+    void ShowCornerImage(const cv::Mat& img_mat,
+                         const PointCloudPtr& pc);
     /* Get Internal Values */
     const PointCloudPtr GetNewVertices() const { return new_corners_cloud_;};
     const cv::Mat       GetCloudImgMat() const { return img_mat_;};
 };
 
 #endif
-
-/************************** UNUSE CODE ****************************/
-
-// inline void ImgGradientGXGY(const cv::Mat& imgIn, cv::Mat& GX, cv::Mat& GY) {
-//         cv::Scharr(imgIn, GX, CV_32F, 1, 0);
-//         cv::Scharr(imgIn, GY, CV_32F, 0, 1);
-// }
