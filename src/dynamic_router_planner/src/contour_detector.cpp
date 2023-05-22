@@ -61,9 +61,9 @@ void ContourDetector::UpdateImgMatWithCloud(const PointCloudPtr& pc, cv::Mat& im
         }
     }
     cv::threshold(img_mat, img_mat, THRED, 1.0, cv::ThresholdTypes::THRESH_BINARY);
-    if (cd_params_.is_save_img) {
-        this->SaveCurrentImg(img_mat);
-    }
+    // if (cd_params_.is_save_img) {
+    //     this->SaveCurrentImg(img_mat);
+    // }
 }
 
 void ContourDetector::ResizeAndBlurImg(const cv::Mat& img, cv::Mat& Rimg) {
@@ -71,6 +71,9 @@ void ContourDetector::ResizeAndBlurImg(const cv::Mat& img, cv::Mat& Rimg) {
     cv::resize(Rimg, Rimg, cv::Size(), cd_params_.kRatio, cd_params_.kRatio, 
                cv::InterpolationFlags::INTER_LINEAR);
     cv::boxFilter(Rimg, Rimg, -1, cv::Size(cd_params_.kBlurSize, cd_params_.kBlurSize), cv::Point2i(-1, -1), false);
+
+    // do close operation on Rimg    
+    // cv::morphologyEx(Rimg, Rimg, cv::MORPH_CLOSE, getStructuringElement(cv::MORPH_RECT, cv::Size(7, 7)));
 }
 
 void ContourDetector::ExtractContourFromImg(const cv::Mat& img,
@@ -102,11 +105,28 @@ void ContourDetector::ExtractRefinedContours(const cv::Mat& imgIn,
 { 
 
     std::vector<std::vector<cv::Point2i>> raw_contours;
+    std::vector<std::vector<cv::Point2i>> approx_contours;
     refined_contours.clear(), refined_hierarchy_.clear();
     cv::findContours(imgIn, raw_contours, refined_hierarchy_, 
                      cv::RetrievalModes::RETR_TREE, 
                      cv::ContourApproximationModes::CHAIN_APPROX_TC89_L1);
-                     
+
+    int raw_cnt = 0, approx_cnt = 0;
+    for (std::size_t i=0; i<raw_contours.size(); i++) {
+        const auto c = raw_contours[i];
+        double peri = cv::arcLength(c, true);
+        // double eps = 0.001;
+        std::vector<cv::Point> approx;
+        cv::approxPolyDP(c, approx, cd_params_.approx_eps * peri, true);
+        approx_contours.push_back(approx);
+
+        raw_cnt += c.size();
+        approx_cnt += approx.size();
+    }
+    ROS_INFO("CD: raw contours size: %d, approx contours size: %d", raw_cnt, approx_cnt);
+    raw_contours = approx_contours;
+
+
     this->CopyContours(raw_contours, refined_contours);
     for (std::size_t i=0; i<raw_contours.size(); i++) {
         const auto c = raw_contours[i];
@@ -125,6 +145,38 @@ void ContourDetector::ExtractRefinedContours(const cv::Mat& imgIn,
         refined_contours[i].resize(refined_idx);
     }
     this->TopoFilterContours(refined_contours);
+
+    // visulize refined_contours
+    if (cd_params_.is_save_img) {
+        cv::Mat img_raw_contours;
+        imgIn.copyTo(img_raw_contours);
+        cv::cvtColor(img_raw_contours, img_raw_contours, cv::COLOR_GRAY2BGR);
+
+        cv::Mat img_refined_contours;
+        img_raw_contours.copyTo(img_refined_contours);
+
+        cv::Mat img_concat;
+
+        for (int i=0; i<raw_contours.size(); i++) {
+            const auto poly = raw_contours[i];
+            for (int j=0; j<poly.size(); j++) {
+                cv::circle(img_raw_contours, poly[j], 3, cv::Scalar(0, 0, 255), 1);
+            }
+        }
+        for (int i=0; i<refined_contours.size(); i++) {
+            const auto poly = refined_contours[i];
+            for (int j=0; j<poly.size(); j++) {
+                cv::circle(img_refined_contours, poly[j], 3, cv::Scalar(0, 0, 255), 1);
+            }
+        }
+
+        cv::resize(img_raw_contours, img_raw_contours, cv::Size(), 1.0/cd_params_.kRatio, 1.0/cd_params_.kRatio, 
+            cv::InterpolationFlags::INTER_LINEAR);
+        cv::resize(img_refined_contours, img_refined_contours, cv::Size(), 1.0/cd_params_.kRatio, 1.0/cd_params_.kRatio, 
+            cv::InterpolationFlags::INTER_LINEAR);
+        cv::hconcat(img_raw_contours, img_refined_contours, img_concat);
+        this->SaveCurrentImg(img_concat);
+    }
 }
 
 void ContourDetector::TopoFilterContours(std::vector<CVPointStack>& contoursInOut) {
