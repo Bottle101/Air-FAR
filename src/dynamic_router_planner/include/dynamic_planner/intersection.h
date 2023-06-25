@@ -68,6 +68,34 @@ static bool doIntersect(Point2f p1, Point2f q1, Point2f p2, Point2f q2)
 
 	return false; // Doesn't fall in any of the above cases
 }
+
+static Point2f IntersectionwithLine(Point2f p1, Point2f p2, Point2f p3, Point2f p4) {
+	// Line AB represented as a1x + b1y = c1
+	double a1 = p2.y - p1.y;
+	double b1 = p1.x - p2.x;
+	double c1 = a1*(p1.x) + b1*(p1.y);
+ 
+	// Line CD represented as a2x + b2y = c2
+	double a2 = p4.y - p3.y;
+	double b2 = p3.x - p4.x;
+	double c2 = a2*(p3.x)+ b2*(p3.y);
+ 
+	double determinant = a1*b2 - a2*b1;
+ 
+	if (determinant == 0)
+	{
+		// The lines are parallel. This is simplified
+		// by returning a pair of FLT_MAX
+		return Point2f(FLT_MAX, FLT_MAX);
+	}
+	else
+	{
+		double x = (b2*c1 - b1*c2)/determinant;
+		double y = (a1*c2 - a2*c1)/determinant;
+		return Point2f(x, y);
+	}
+}
+
 }
 
 #endif

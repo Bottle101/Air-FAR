@@ -48,14 +48,16 @@ private:
     bool IsValidConnect(const NavNodePtr& node_ptr1, 
                         const NavNodePtr& node_ptr2,
                         const bool& is_local_only,
-                        const bool& is_check_contour=true);
+                        const bool& is_check_contour=true,
+                        const bool& is_layer_limited=true);
     
     bool IsValidConnect(const NavNodePtr& node_ptr1, 
                         const NavNodePtr& node_ptr2,
                         const bool& is_local_only,
                         const bool& is_check_contour,
                         bool& _is_merge,
-                        bool& _is_matched);
+                        bool& _is_matched,
+                        const bool& is_layer_limited);
 
     bool NodeLocalPerception(const NavNodePtr& node_ptr,
                              bool& _is_wall_end,
@@ -100,6 +102,8 @@ private:
     bool IsNodeFullyCovered(const NavNodePtr& node_ptr);
 
     bool ReEvaluateConnectUsingTerrian(const NavNodePtr& node_ptr1, const NavNodePtr node_ptr2);
+
+
 
     /* Assign ID to new navigation node */
     static inline void AssignGlobalNodeID(const NavNodePtr& node_ptr) {
@@ -279,6 +283,8 @@ private:
         node_ptr->is_contour_match = true;
         node_ptr->ctnode = ctnode_ptr;
         node_ptr->free_direct = ctnode_ptr->free_direct;
+        node_ptr->is_wall_corner = ctnode_ptr->is_wall_corner;
+        node_ptr->is_wall_insert = ctnode_ptr->is_wall_insert;
         UpdateNodeSurfDirs(node_ptr, ctnode_ptr->surf_dirs);
     }
 
@@ -532,7 +538,25 @@ public:
     const NodePtrStack& GetNewNodes() const { return new_nodes_;};
     const NavNodePtr& GetLastInterNavNode() const { return last_internav_ptr_;};
 
+    void ConnectVerticalNodes(const NavNodePtr& node_ptr1, const NavNodePtr& node_ptr2);
 
+    void AddVerticalEdges(const NavNodePtr& node_ptr, const NavNodePtr& connected_ptr);
+    void AddUpwardEdges(const NavNodePtr& node_ptr, const NavNodePtr& connected_ptr);
+    void AddDownwardEdges(const NavNodePtr& node_ptr, const NavNodePtr& connected_ptr);
+
+    bool IsValidVertConnect(const NavNodePtr& node_ptr1, 
+                        const NavNodePtr& node_ptr2,
+                        const bool& is_local_only,
+                        const bool& is_check_contour=true,
+                        const bool& is_layer_limited=true);
+    
+    bool IsValidVertConnect(const NavNodePtr& node_ptr1, 
+                        const NavNodePtr& node_ptr2,
+                        const bool& is_local_only,
+                        const bool& is_check_contour,
+                        bool& _is_merge,
+                        bool& _is_matched,
+                        bool& is_layer_limited);
 };
 
 

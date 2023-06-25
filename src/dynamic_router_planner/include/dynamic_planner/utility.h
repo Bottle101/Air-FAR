@@ -35,6 +35,7 @@
 /*OpenCV Library*/
 #include <opencv2/imgproc.hpp>
 #include <opencv2/highgui.hpp>
+#include <opencv2/flann.hpp>
 /* PCL Library*/
 #include <pcl/point_cloud.h>
 #include <pcl/search/kdtree.h>

@@ -55,6 +55,8 @@ Point3D last_planning_odom_;
 
 float VERTICAL_ANGLE_COS;
 
+float SameLayerTolerZ = DPUtil::kTolerZ / (DPUtil::kNeighborLayers + 0.5) / 2.0;
+
 float PriorityScore(const NavNodePtr& node_ptr);
 
 bool ReconstructPath(const NavNodePtr& goal_node_ptr,
@@ -131,6 +133,8 @@ inline bool IsPointsInSameLevel(const Point3D& p, const Point3D& ref_p) {
     return false;
 }
 
+void SetInsertNode(const NavNodePtr& insert_node_ptr, const NavNodePair& insert_node_parents);
+
 public:
 
 GraphPlanner() = default;
@@ -206,6 +210,15 @@ inline void ResetPlannerInternalValues() {
 }
 
 const NavNodePtr& GetGoalNodePtr() const { return goal_node_ptr_;};
+
+NodePtrStack insert_nav_nodes;
+
+void IterativePathSearch(NodePtrStack& graph,
+                        const NavNodePtr& odom_node_ptr,
+                        const NavNodePtr& goal_node_ptr);
+
+void ClearInsertNodes(const NodePtrStack& insert_nav_nodes);
+
 
 };
 

@@ -77,16 +77,20 @@ void DPVisualizer::VizContourGraph(const std::vector<CTNodeStack>& contour_graph
                                    const std::vector<int>& cur_layer_idxs) 
 {
     MarkerArray contour_marker_array;
-    Marker contour_vertex_marker, vertex_matched_marker, contour_marker, contour_surf_marker, contour_helper_marker;
+    Marker contour_vertex_marker, vertex_matched_marker, contour_marker, contour_surf_marker, contour_helper_marker, top_layer_vertex_marker, wall_corner_marker;
     Marker global_contour_marker;
     contour_vertex_marker.type = Marker::SPHERE_LIST;
     vertex_matched_marker.type = Marker::SPHERE_LIST;
+    top_layer_vertex_marker.type = Marker::SPHERE_LIST;
+    wall_corner_marker.type = Marker::SPHERE_LIST;
     contour_marker.type   = Marker::LINE_LIST;
     contour_surf_marker.type    = Marker::LINE_LIST;
     contour_helper_marker.type  = Marker::CUBE_LIST;
     global_contour_marker.type = Marker::LINE_LIST;
     this->SetMarker(VizColor::EMERALD, "contour_vertex", 0.5f, 0.5f, contour_vertex_marker);
     this->SetMarker(VizColor::RED,     "matched_vertex", 0.5f, 0.5f, vertex_matched_marker);
+    this->SetMarker(VizColor::YELLOW, "top_layer_vertex", 0.5f, 0.5f, top_layer_vertex_marker);
+    this->SetMarker(VizColor::YELLOW, "wall_corner_marker", 0.5f, 0.5f, wall_corner_marker);
     this->SetMarker(VizColor::MAGNA,   "contour",        0.1f, 0.25f, contour_marker);
     this->SetMarker(VizColor::BLUE,    "contour_surf",   0.15f, 0.75f, contour_surf_marker);
     this->SetMarker(VizColor::BLUE,    "contour_direct", 0.25f, 0.75f, contour_helper_marker);
@@ -99,13 +103,33 @@ void DPVisualizer::VizContourGraph(const std::vector<CTNodeStack>& contour_graph
         if (ctnode_ptr->is_global_match) {
             vertex_matched_marker.points.push_back(geo_vertex);
         }
+        if (ctnode_ptr->up == NULL) {
+            top_layer_vertex_marker.points.push_back(geo_vertex);
+        }
         if (ctnode_ptr->front == NULL || ctnode_ptr->back == NULL) return;
         contour_marker.points.push_back(geo_vertex);
         geo_connect = DPUtil::Point3DToGeoMsgPoint(ctnode_ptr->front->position);
         contour_marker.points.push_back(geo_connect);
+
         contour_marker.points.push_back(geo_vertex);
         geo_connect = DPUtil::Point3DToGeoMsgPoint(ctnode_ptr->back->position);
         contour_marker.points.push_back(geo_connect);
+
+        if (ctnode_ptr->up != NULL) {
+            contour_marker.points.push_back(geo_vertex);
+            geo_connect = DPUtil::Point3DToGeoMsgPoint(ctnode_ptr->up->position);
+            contour_marker.points.push_back(geo_connect);
+        }
+
+        if (ctnode_ptr->is_wall_corner) {
+            wall_corner_marker.points.push_back(geo_vertex);
+        }
+        // if (ctnode_ptr->down != NULL) {
+        //     contour_marker.points.push_back(geo_vertex);
+        //     geo_connect = DPUtil::Point3DToGeoMsgPoint(ctnode_ptr->down->position);
+        //     contour_marker.points.push_back(geo_connect);
+        // }
+
     };
     auto Draw_Surf_Dir = [&](const CTNodePtr& ctnode) {
         geometry_msgs::Point p1, p2, p3;
@@ -150,6 +174,8 @@ void DPVisualizer::VizContourGraph(const std::vector<CTNodeStack>& contour_graph
     contour_marker_array.markers.push_back(contour_surf_marker);
     contour_marker_array.markers.push_back(contour_helper_marker);
     contour_marker_array.markers.push_back(global_contour_marker);
+    contour_marker_array.markers.push_back(top_layer_vertex_marker);
+    contour_marker_array.markers.push_back(wall_corner_marker);
     viz_contour_pub_.publish(contour_marker_array);
 }
 
@@ -157,13 +183,14 @@ void DPVisualizer::VizGraph(const NodePtrStack& graph) {
     MarkerArray graph_marker_array;
     Marker nav_node_marker, unfinal_node_marker, reachable_node_marker, near_node_marker, covered_node_marker, internav_node_marker, 
            edge_marker, contour_edge_marker, odom_edge_marker, goal_edge_marker, trajectory_edge_marker,
-           corner_surf_marker, contour_align_marker, corner_helper_marker;
+           corner_surf_marker, contour_align_marker, corner_helper_marker, top_node_marker, top_contour_marker;
     nav_node_marker.type       = Marker::SPHERE_LIST;
     unfinal_node_marker.type   = Marker::SPHERE_LIST;
     reachable_node_marker.type = Marker::SPHERE_LIST;
     near_node_marker.type      = Marker::SPHERE_LIST;
     covered_node_marker.type   = Marker::SPHERE_LIST;
     internav_node_marker.type  = Marker::SPHERE_LIST;
+    top_node_marker.type       = Marker::SPHERE_LIST;
     contour_align_marker.type  = Marker::LINE_LIST;
     edge_marker.type           = Marker::LINE_LIST;
     contour_edge_marker.type   = Marker::LINE_LIST;
@@ -171,6 +198,7 @@ void DPVisualizer::VizGraph(const NodePtrStack& graph) {
     goal_edge_marker.type      = Marker::LINE_LIST;
     trajectory_edge_marker.type = Marker::LINE_LIST;
     corner_surf_marker.type    = Marker::LINE_LIST;
+    top_contour_marker.type    = Marker::LINE_LIST;
     corner_helper_marker.type  = Marker::CUBE_LIST;
     this->SetMarker(VizColor::WHITE,   "graph_node",     0.5f,  0.5f,  nav_node_marker);
     this->SetMarker(VizColor::RED,     "unfinal_node",   0.5f,  0.8f,  unfinal_node_marker);
@@ -186,6 +214,9 @@ void DPVisualizer::VizGraph(const NodePtrStack& graph) {
     this->SetMarker(VizColor::YELLOW,  "corner_surf",    0.15f, 0.75f, corner_surf_marker);
     this->SetMarker(VizColor::YELLOW,  "surf_direct",    0.25f, 0.75f, corner_helper_marker);
     this->SetMarker(VizColor::RED,     "contour_align",  0.1f,  0.5f,  contour_align_marker);
+    this->SetMarker(VizColor::RED,     "top_node",       0.5f,  0.5f,  top_node_marker);
+    this->SetMarker(VizColor::RED,     "top_contour",    0.2f,  0.2f, top_contour_marker);
+
     /* Lambda Function */
     auto Draw_Contour_Align = [&](const NavNodePtr& node_ptr) {
         if (node_ptr->is_odom || !node_ptr->is_contour_match) return;
@@ -213,8 +244,14 @@ void DPVisualizer::VizGraph(const NodePtrStack& graph) {
                 odom_edge_marker.points.push_back(p1);
                 odom_edge_marker.points.push_back(p2);
             } else {
+                // if ((cnode->position - node_ptr->position).norm() > 30.0) {
                 edge_marker.points.push_back(p1);
-                edge_marker.points.push_back(p2);
+                edge_marker.points.push_back(p2);                    
+                // }
+                // if (cnode->is_inserted || node_ptr->is_inserted) {
+                // edge_marker.points.push_back(p1);
+                // edge_marker.points.push_back(p2);                    
+                // }                
             }
         }
         // contour edges
@@ -226,6 +263,18 @@ void DPVisualizer::VizGraph(const NodePtrStack& graph) {
             p2 = DPUtil::Point3DToGeoMsgPoint(ct_cnode->position);
             contour_edge_marker.points.push_back(p1);
             contour_edge_marker.points.push_back(p2);
+        }
+        // top layer contour edges
+        if (node_ptr->up_node == NULL && node_ptr->down_node != NULL && node_ptr->free_direct == NodeFreeDirect::CONVEX) {
+            for (const auto& ct_cnode : node_ptr->contour_connects) {
+                if (ct_cnode == NULL) {
+                    ROS_WARN("Viz: node top layer contour connect to a NULL node");
+                    continue;
+                } else if (ct_cnode == node_ptr->down_node) continue;
+                p2 = DPUtil::Point3DToGeoMsgPoint(ct_cnode->position);
+                top_contour_marker.points.push_back(p1);
+                top_contour_marker.points.push_back(p2);
+            }
         }
         // inter navigation trajectory connections
         if (node_ptr->is_navpoint) {
@@ -270,6 +319,9 @@ void DPVisualizer::VizGraph(const NodePtrStack& graph) {
         if (!nav_node_ptr->is_finalized) {
             unfinal_node_marker.points.push_back(cpoint);
         }
+        if (nav_node_ptr->up_node == NULL && nav_node_ptr->down_node != NULL && nav_node_ptr->free_direct == NodeFreeDirect::CONVEX) {
+            top_node_marker.points.push_back(cpoint);
+        }
         if (nav_node_ptr->is_reach_goal) {
             reachable_node_marker.points.push_back(cpoint);
         }
@@ -302,6 +354,8 @@ void DPVisualizer::VizGraph(const NodePtrStack& graph) {
     graph_marker_array.markers.push_back(corner_surf_marker);
     graph_marker_array.markers.push_back(corner_helper_marker);
     graph_marker_array.markers.push_back(contour_align_marker);
+    graph_marker_array.markers.push_back(top_node_marker);
+    graph_marker_array.markers.push_back(top_contour_marker);
     viz_graph_pub_.publish(graph_marker_array);
 }
 

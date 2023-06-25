@@ -27,6 +27,10 @@ struct ContourGraphParams {
     ContourGraphParams() = default;
     float kAroundDist;
     float kPillarPerimeter;
+    int KD_TREE_K;
+    int knn_search_num_;
+    float knn_search_radius_;
+    float wall_insert_factor;
 };
 
 class ContourGraph {
@@ -39,10 +43,13 @@ public:
     static std::vector<CTNodeStack>  multi_contour_graph_;
     static std::vector<PolygonStack> multi_contour_polygons_;
     static std::vector<std::vector<PointPair>> multi_global_contour_;
+    std::vector<std::unique_ptr<cv::flann::Index>> multi_contour_graph_kdtree_;
+    bool is_kdtree_built_ = false;
 
 
     ContourGraphParams ctgraph_params_;
     float ALIGN_ANGLE_COS;
+    std::unique_ptr<cv::flann::KDTreeIndexParams> indexParams;
 
     NavNodePtr odom_node_ptr_ = NULL;
     
@@ -58,6 +65,9 @@ public:
 
     void ExtractGlobalContours(const NodePtrStack& nav_graph, const std::vector<int>& cur_layers);
 
+    // Connect Vertical Edges based on KNN search
+    void ConnectVerticalEdges(const int& layer_id);
+
     static bool IsNavNodesConnectFromContour(const NavNodePtr& node_ptr1, 
                                           const NavNodePtr& node_ptr2);
 
@@ -66,7 +76,8 @@ public:
 
     static bool IsNavNodesConnectFreePolygon(const NavNodePtr& node_ptr1,
                                              const NavNodePtr& node_ptr2,
-                                             const bool& is_local_only=false);
+                                             const bool& is_local_only=false,
+                                             const bool& layer_limited=true);
 
     static bool IsNavToGoalConnectFreePolygon(const NavNodePtr& node_ptr,
                                               const NavNodePtr& goal_ptr);
@@ -80,6 +91,9 @@ public:
                                            const bool& is_global_check,
                                            const bool& layer_limited=true);
 
+    static bool IsEdgeCollideSegment(const PointPair& line, const ConnectPair& edge);
+
+    static cv::Point2f getIntersectionPoint(const PointPair& line, const ConnectPair& edge);
     // static bool ReprojectPointOutsidePolygons(Point3D& point, const float& free_radius);
 
     bool IsPointInVetexAngleRestriction(const CTNodePtr& ctnode, const Point3D end_p);
@@ -132,8 +146,6 @@ private:
 
     static bool IsEdgeCollidePoly(const PointStack& poly, const ConnectPair& edge);
 
-    static bool IsEdgeCollideSegment(const PointPair& line, const ConnectPair& edge);
-
     inline static bool IsNeedGlobalCheck(const Point3D& p1, const Point3D& p2, const Point3D& robot_p) {
         if ((p1 - robot_p).norm() > DPUtil::kSensorRange || (p2 - robot_p).norm() > DPUtil::kSensorRange) {
             return true;
@@ -159,9 +171,12 @@ private:
     /* Analysis CTNode surface angle */
     void AnalysisSurfAngleAndConvexity(const CTNodeStack& contour_graph);
 
+    // calculate KD-Tree on contour graph
+    void BuildKDTreeOnContourGraph(const CTNodeStack& contour_graph, const int& layer_id);
+    void SearchKNN(const CTNodePtr& node, std::vector<int>& indices, const int& layer_id);
+    bool InsertWallNodes(CTNodePtr& start, CTNodePtr& end, const int& layer_idx);
+    void SetWallCornerNodes(const CTNodePtr& node_ptr1, const CTNodePtr& node_ptr2, const int& layer_idx);
 
 };
-
-
 
 #endif

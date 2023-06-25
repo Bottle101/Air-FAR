@@ -27,7 +27,7 @@ ScanHandler/inflate_scan_size           : 5
 
 # Dynamic Planner Utility Params
 Util/angle_noise                        : 12.0 # Unit: degree
-Util/accept_max_align_angle             : 30.0  # Unit: degree
+Util/accept_max_align_angle             : 15.0  # Unit: degree
 Util/new_intensity_thred                : 2.0
 Util/nav_clear_dist                     : 0.75
 Util/terrain_free_Z                     : 0.25
@@ -37,26 +37,26 @@ Util/inflate_counter                    : 1
 Util/dynamic_obs_dacay_time             : 10.0
 
 # Dynamic Graph Params
-Graph/node_near_dist                    : 1.0   # Unit: meter
+Graph/node_near_dist                    : 1.5   # Unit: meter
 Graph/move_thred                        : 0.1   # Unit: meter
-Graph/connect_votes_size                : 10
+Graph/connect_votes_size                : 3
 Graph/trajectory_interval_ratio         : 2.5
 Graph/terrain_inflate_size              : 5      
 Graph/clear_dumper_thred                : 4
 Graph/node_finalize_thred               : 6
 Graph/RANSAC_pool_size                  : 12
-Graphj/vertical_angle_thred             : 30.0  # Unit: degree
+Graphj/vertical_angle_thred             : 25.0  # Unit: degree
 Graph/connect_angle_thred               : 6.0   # Unit: degree
 Graph/pos_filter_margin                 : 0.5   # Unit: meter
 Graph/dirs_filter_margin                : 10.0  # Unit: degree
 
 # Corner Detector Params
 CDetector/resize_ratio                  : 2.0
-CDetector/img_blur_size                 : 15.0
+CDetector/img_blur_size                 : 7.0
 CDetector/filter_count_value            : 3
-CDetector/approx_eps                    : 0.001 # 0.001 is pretty good, if the environment is really complex (near_node number > 1000), you can try 0.005
+CDetector/approx_eps                    : 0.003 # 0.005 is pretty good, if the environment is really complex (near_node number > 1000), you can try 0.01
 CDetector/is_inflate_image              : true
-CDetector/is_save_img                   : false
+CDetector/is_save_img                   : true
 CDetector/img_folder_path               : /home/bottle/hbt_ws/AirFar_dev/data/contour_campus/revised/
 
 # Graph Planner Params
@@ -73,5 +73,8 @@ GPlanner/clear_inflate_size             : 3
 # Contour Graph Params
 ContourGraph/around_distance            : 0.75
 ContourGraph/pillar_perimeter_dist      : 3.0  # Unit: meter
-
+ContourGraph/KDTree_num                 : 8
+ContourGraph/KDTree_neighbor_size       : 3
+ContourGraph/KNN_search_radius          : 2.0  # Unit: meter
+ContourGraph/wall_insert_factor         : 0.6 
 

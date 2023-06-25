@@ -13,7 +13,9 @@ enum NodeFreeDirect {
   UNKNOW  =  0,
   CONVEX  =  1,
   CONCAVE =  2,
-  PILLAR  =  3
+  PILLAR  =  3,
+  INSERT = 4,
+  TOP_LAYER = 1
 };
 
 typedef std::pair<Point3D, Point3D> PointPair;
@@ -48,6 +50,8 @@ struct CTNode
     int layer_id;
     Point3D position;
     bool is_global_match;
+    bool is_wall_corner;
+    bool is_wall_insert;
     std::size_t nav_node_id;
     NodeFreeDirect free_direct;
 
@@ -55,12 +59,15 @@ struct CTNode
     PolygonPtr poly_ptr;
     std::shared_ptr<CTNode> front;
     std::shared_ptr<CTNode> back;
+    std::shared_ptr<CTNode> up;
+    std::shared_ptr<CTNode> down;
 
     std::vector<std::shared_ptr<CTNode>> connect_nodes;
 };
 
 typedef std::shared_ptr<CTNode> CTNodePtr;
 typedef std::vector<CTNodePtr> CTNodeStack;
+typedef std::pair<CTNodePtr, CTNodePtr> CTNodePair;
 
 struct NavNode
 {
@@ -75,6 +82,8 @@ struct NavNode
     std::deque<PointPair> surf_dirs_vec;
     CTNodePtr ctnode;
     bool is_contour_match;
+    bool is_top_layer = false;
+    bool is_inserted = false;
     bool is_odom;
     bool is_goal;
     bool is_intermediate;
@@ -84,10 +93,14 @@ struct NavNode
     bool is_frontier;
     bool is_finalized;
     bool is_navpoint;
+    bool is_wall_corner;
+    bool is_wall_insert;
     int clear_dumper_count;
     int finalize_counter;
     std::vector<std::shared_ptr<NavNode>> connect_nodes;
     std::vector<std::shared_ptr<NavNode>> contour_connects;
+    std::shared_ptr<NavNode> up_node = NULL;
+    std::shared_ptr<NavNode> down_node =NULL;
     std::unordered_map<int, std::deque<int>> contour_votes;
     std::unordered_map<int, std::deque<int>> edge_votes;
     std::vector<std::shared_ptr<NavNode>> potential_contours;
@@ -104,11 +117,13 @@ struct NavNode
     float gscore, fgscore;
     std::shared_ptr<NavNode> parent;
     std::shared_ptr<NavNode> free_parent;
+    std::pair<std::shared_ptr<NavNode>, std::shared_ptr<NavNode>> insert_node_parents;
     
 };
 
 typedef std::shared_ptr<NavNode> NavNodePtr;
 typedef std::pair<NavNodePtr, NavPair> MapPair;
+typedef std::pair<NavNodePtr, NavNodePtr> NavNodePair;
 
 struct nodeptr_equal
 {

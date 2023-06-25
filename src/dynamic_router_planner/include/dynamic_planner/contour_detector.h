@@ -78,7 +78,9 @@ private:
                                      std::size_t& refined_idx)
     {
         if (refined_idx < 2) return;
-        if (!IsPrevWallVertex(contour[refined_idx-2], contour[refined_idx-1], add_p)) {
+        if (!IsPrevWallVertex(contour[refined_idx-2], contour[refined_idx-1], add_p) 
+        || DPUtil::PixelDistance(contour[refined_idx-2], contour[refined_idx-1]) > 4.0 * DIST_LIMIT
+        || DPUtil::PixelDistance(add_p, contour[refined_idx-1]) > 4.0 * DIST_LIMIT) {
             return;
         } else {
             -- refined_idx;

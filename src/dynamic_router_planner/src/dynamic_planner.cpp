@@ -134,16 +134,23 @@ void DPMaster::Loop() {
 
       std_msgs::Float32 mapping_timer;
       DPUtil::Timer.start_time("Graph_mapping");
-
       /* Extract Vertices and new nodes */
       PointCloudPtr layer_cloud_ptr(new pcl::PointCloud<PCLPoint>());
-      ROS_ERROR("layer_idxs size: %ld", cur_layer_idxs_.size());
+      // ROS_ERROR("layer_idxs size: %ld", cur_layer_idxs_.size());
       for (const int& layer_idx : cur_layer_idxs_) {
         std::vector<PointStack> realworld_contour;
         map_handler_.GetSurroundObsCloud(layer_cloud_ptr, layer_idx);
-        
+        // DPUtil::Timer.start_time("Image_operation");        
         contour_detector_.BuildTerrianImgAndExtractContour(odom_node_ptr_, DPUtil::layerIdx2Height_[layer_idx], layer_cloud_ptr, realworld_contour);
+        // DPUtil::Timer.end_time("Image_operation");
+        if (realworld_contour.size() == 0) {
+          ROS_WARN("DPMaster: No contour detected in layer %d", layer_idx);
+          continue;
+        }
         contour_graph_.UpdateContourGraph(odom_node_ptr_, layer_idx, realworld_contour);
+        if (layer_idx != cur_layer_idxs_.front()) {
+          contour_graph_.ConnectVerticalEdges(layer_idx-1);
+        }
       }
 
       wide_nav_graph_ = graph_manager_.GetWideNavGraph();
@@ -182,10 +189,20 @@ void DPMaster::Loop() {
       goal_node_ptr_ = graph_planner_.GetGoalNodePtr();
       if (goal_node_ptr_ != NULL) {
         graph_planner_.UpdateGoalNavNodeConnects(goal_node_ptr_, nav_graph_);
-      }
+        graph_planner_.IterativePathSearch(nav_graph_, odom_node_ptr_, goal_node_ptr_);
+        std::cout << "DPMaster: Goal node connects updated." << std::endl;
+        // nav_graph_.insert(nav_graph_.end(), graph_planner_.insert_nav_nodes.begin(), graph_planner_.insert_nav_nodes.end());
 
+        if (graph_planner_.insert_nav_nodes.size() > 0) {
+          planner_viz_.VizNodes(graph_planner_.insert_nav_nodes, "insert_nav_nodes", VizColor::GREEN, 0.5);
+          planner_viz_.VizNodes(graph_planner_.insert_nav_nodes[0]->contour_connects, "insert_connected_nodes", VizColor::RED, 0.5);
+        }
+      }
+      // /* Graph Messager Update */
+      // graph_msger_.UpdateGlobalGraph(nav_graph_);
       // /* Graph Planning */
       graph_planner_.UpdateGraphTraverability(nav_graph_, odom_node_ptr_);
+      std::cout << "DPMaster: Graph traverability updated." << std::endl;
       PointStack global_path;
       Point3D last_nav_goal, current_free_goal;
       bool is_planning_fails = false;
@@ -216,11 +233,18 @@ void DPMaster::Loop() {
           goal_pub_.publish(goal_waypoint_stamped_);
         }
       }
-
+      std::cout << "DPMaster: Graph planning finished." << std::endl;
+      
       // Viz Navigation Graph
       planner_viz_.VizPoint3D(DPUtil::free_odom_p, "free_odom_position", VizColor::ORANGE, 1.0);
       planner_viz_.VizGraph(nav_graph_);
+
+      // if (goal_node_ptr_ != NULL && DPUtil::IsTypeInStack(graph_planner_.insert_nav_nodes[0], graph_planner_.insert_nav_nodes[1]->connect_nodes)) {
+      //   ROS_ERROR("DPMaster: Insert node is connected!");
+      // }
+
       planner_viz_.VizContourGraph(ContourGraph::multi_contour_graph_, ContourGraph::multi_global_contour_, cur_layer_idxs_);
+      graph_planner_.ClearInsertNodes(graph_planner_.insert_nav_nodes);
       // reset additional update flag
       if (is_robot_stop_) {
         ROS_WARN_COND(is_goal_update_,  "DPMaster: Goal updated, wait for robot to move...");
@@ -234,8 +258,6 @@ void DPMaster::Loop() {
     loop_rate.sleep();
   }
 }
-
-
 
 Point3D DPMaster::ProjectNavWaypoint(const Point3D& nav_waypoint, const Point3D& last_waypoint) {
   const bool is_momentum = (last_waypoint - nav_waypoint).norm() < DPUtil::kEpsilon ? true : false; // momentum heading if same goal
@@ -380,6 +402,10 @@ void DPMaster::LoadROSParams() {
   // contour graph params
   nh.param<float>(contour_prefix + "around_distance", cg_params_.kAroundDist, 1.0);
   nh.param<float>(contour_prefix + "pillar_perimeter_dist", cg_params_.kPillarPerimeter, 4.0);
+  nh.param<int>(contour_prefix + "KDTree_num", cg_params_.KD_TREE_K, 5);
+  nh.param<int>(contour_prefix + "KDTree_neighbor_size", cg_params_.knn_search_num_, 1);
+  nh.param<float>(contour_prefix + "KNN_search_radius", cg_params_.knn_search_radius_, 1.5);
+  nh.param<float>(contour_prefix + "wall_insert_factor", cg_params_.wall_insert_factor, 0.6);
 }
 
 void DPMaster::OdomCallBack(const nav_msgs::OdometryConstPtr& msg) {
