@@ -81,6 +81,8 @@ public:
 
     static bool IsNavToGoalConnectFreePolygon(const NavNodePtr& node_ptr,
                                               const NavNodePtr& goal_ptr);
+    static bool IsNavToOdomConnectFreePolygon(const NavNodePtr& node_ptr,
+                                              const NavNodePtr& odom_ptr);                                        
 
     // static bool IsPoint3DConnectFreePolygon(const Point3D& p1, const Point3D& p2, 
     //                                         const int& start_layer, const int& end_layer);
@@ -90,6 +92,8 @@ public:
                                            const int& end_layer,
                                            const bool& is_global_check,
                                            const bool& layer_limited=true);
+
+    static bool IsTopLayerNodesConnectFreePolygon(const NavNodePtr& node_ptr1, const NavNodePtr& node_ptr2, const bool& layer_limited);
 
     static bool IsEdgeCollideSegment(const PointPair& line, const ConnectPair& edge);
 

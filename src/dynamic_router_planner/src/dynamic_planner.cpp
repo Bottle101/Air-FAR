@@ -185,31 +185,40 @@ void DPMaster::Loop() {
 
       /* Graph Messager Update */
       graph_msger_.UpdateGlobalGraph(nav_graph_);
+      // Graph Planner Update 
+      graph_planner_.UpdateGlobalGraph(nav_graph_);
       /* Update connection of goal node if exist */
       goal_node_ptr_ = graph_planner_.GetGoalNodePtr();
-      if (goal_node_ptr_ != NULL) {
-        graph_planner_.UpdateGoalNavNodeConnects(goal_node_ptr_, nav_graph_);
-        graph_planner_.IterativePathSearch(nav_graph_, odom_node_ptr_, goal_node_ptr_);
-        std::cout << "DPMaster: Goal node connects updated." << std::endl;
-        // nav_graph_.insert(nav_graph_.end(), graph_planner_.insert_nav_nodes.begin(), graph_planner_.insert_nav_nodes.end());
 
-        if (graph_planner_.insert_nav_nodes.size() > 0) {
-          planner_viz_.VizNodes(graph_planner_.insert_nav_nodes, "insert_nav_nodes", VizColor::GREEN, 0.5);
-          planner_viz_.VizNodes(graph_planner_.insert_nav_nodes[0]->contour_connects, "insert_connected_nodes", VizColor::RED, 0.5);
-        }
+      if (goal_node_ptr_ != NULL) {
+        graph_planner_.insert_nav_nodes.clear();
+        graph_planner_.UpdateGoalNavNodeConnects(goal_node_ptr_);
+        graph_planner_.InsertNodes(odom_node_ptr_, goal_node_ptr_);
       }
-      // /* Graph Messager Update */
-      // graph_msger_.UpdateGlobalGraph(nav_graph_);
+      DPUtil::Timer.start_time("Path_planning");
+
       // /* Graph Planning */
-      graph_planner_.UpdateGraphTraverability(nav_graph_, odom_node_ptr_);
-      std::cout << "DPMaster: Graph traverability updated." << std::endl;
+      graph_planner_.UpdateGraphTraverability(odom_node_ptr_);
+      // std::cout << "DPMaster: Graph traverability updated." << std::endl;
+      // cout<<"ContourGraph::multi_contour_graph_: "<<ContourGraph::multi_contour_graph_.size()<<endl;
       PointStack global_path;
       Point3D last_nav_goal, current_free_goal;
       bool is_planning_fails = false;
       last_nav_goal = nav_goal_;
       goal_waypoint_stamped_.header.stamp = ros::Time::now();
       bool is_current_free_nav = false;
-      if (is_graph_init_ && graph_planner_.NextGoalPlanning(global_path, nav_goal_, current_free_goal, is_planning_fails, is_current_free_nav)) {
+      NodePtrStack global_path_ptr;
+
+      if (is_graph_init_ && graph_planner_.NextGoalPlanning(global_path, nav_goal_, current_free_goal, is_planning_fails, is_current_free_nav, global_path_ptr)) {
+        graph_planner_.UpdateGraphTraverability(odom_node_ptr_);
+        global_path.clear();
+        global_path_ptr.clear();
+        is_planning_fails = false;
+        is_current_free_nav = false;
+      }
+
+      if (is_graph_init_ && graph_planner_.NextGoalPlanning(global_path, nav_goal_, current_free_goal, is_planning_fails, is_current_free_nav, global_path_ptr)) {
+        graph_planner_.is_divided_path = false;
         Point3D waypoint = nav_goal_;
         if ((waypoint - current_free_goal).norm() > DPUtil::kEpsilon) {
           waypoint = this->ProjectNavWaypoint(waypoint, last_nav_goal);
@@ -233,10 +242,14 @@ void DPMaster::Loop() {
           goal_pub_.publish(goal_waypoint_stamped_);
         }
       }
+      DPUtil::Timer.end_time("Path_planning");
       std::cout << "DPMaster: Graph planning finished." << std::endl;
+
+      planner_viz_.VizNodes(graph_planner_.insert_nav_nodes, "insert_nav_nodes", VizColor::GREEN);
       
       // Viz Navigation Graph
-      planner_viz_.VizPoint3D(DPUtil::free_odom_p, "free_odom_position", VizColor::ORANGE, 1.0);
+      // planner_viz_.VizPoint3D(DPUtil::free_odom_p, "free_odom_position", VizColor::ORANGE, 1.0);
+      nav_graph_ = graph_planner_.GetNavGraph();
       planner_viz_.VizGraph(nav_graph_);
 
       // if (goal_node_ptr_ != NULL && DPUtil::IsTypeInStack(graph_planner_.insert_nav_nodes[0], graph_planner_.insert_nav_nodes[1]->connect_nodes)) {
@@ -245,6 +258,10 @@ void DPMaster::Loop() {
 
       planner_viz_.VizContourGraph(ContourGraph::multi_contour_graph_, ContourGraph::multi_global_contour_, cur_layer_idxs_);
       graph_planner_.ClearInsertNodes(graph_planner_.insert_nav_nodes);
+      graph_planner_.insert_nav_nodes.clear();
+
+
+      
       // reset additional update flag
       if (is_robot_stop_) {
         ROS_WARN_COND(is_goal_update_,  "DPMaster: Goal updated, wait for robot to move...");

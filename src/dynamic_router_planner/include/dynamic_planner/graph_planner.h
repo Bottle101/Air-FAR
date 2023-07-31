@@ -52,6 +52,8 @@ int path_momentum_counter_;
 bool is_global_path_init_;
 float last_waypoint_dist_;
 Point3D last_planning_odom_;
+DPVisualizer gp_viz_;
+NodePtrStack global_graph_;
 
 float VERTICAL_ANGLE_COS;
 
@@ -61,7 +63,8 @@ float PriorityScore(const NavNodePtr& node_ptr);
 
 bool ReconstructPath(const NavNodePtr& goal_node_ptr,
                      const bool& is_free_nav,
-                     PointStack& global_path);
+                     PointStack& global_path,
+                     NodePtrStack& global_path_ptr);
 
 bool IsNodeConnectInFree(const NavNodePtr& current_node,
                          const NavNodePtr& neighbor_node);
@@ -70,6 +73,9 @@ void ReEvaluateGoalStatus(const NavNodePtr& goal_ptr, const NodePtrStack& graphI
 
 bool IsValidConnectToGoal(const NavNodePtr& node_ptr, 
                           const NavNodePtr& goal_node_ptr);
+                
+bool IsValidConnectToOdom(const NavNodePtr& node_ptr, 
+                          const NavNodePtr& odom_node_ptr);
 
 Point3D NextNavWaypointFromPath(const PointStack& global_path);
 
@@ -147,8 +153,7 @@ void Init(const ros::NodeHandle& nh, const GraphPlannerParams& params);
  * @param graph current graph
  * @param odom_node_ptr current odom node ptr
 */
-void UpdateGraphTraverability(const NodePtrStack& graph,
-                              const NavNodePtr& odom_node_ptr);
+void UpdateGraphTraverability(const NavNodePtr& odom_node_ptr);
 
 /**
  * Path planner on dynamic graph
@@ -164,7 +169,8 @@ bool NextGoalPlanning(PointStack& global_path,
                       Point3D& _nav_goal,
                       Point3D& _goal_p,
                       bool& _is_fails,
-                      bool& _is_free_nav);
+                      bool& _is_free_nav,
+                      NodePtrStack& global_path_ptr);
 
 /**
  * @brief Update connectivity between goal node and navigation graph
@@ -172,8 +178,7 @@ bool NextGoalPlanning(PointStack& global_path,
  * @param current_graph current navigation graph
  */
 
-void UpdateGoalNavNodeConnects(const NavNodePtr& goal_node_ptr,
-                               const NodePtrStack& current_graph);
+void UpdateGoalNavNodeConnects(const NavNodePtr& goal_node_ptr);
 
 /**
  * Graph planner goal update API
@@ -209,15 +214,26 @@ inline void ResetPlannerInternalValues() {
     last_planning_odom_ = Point3D(0,0,0);
 }
 
+const NodePtrStack& GetNavGraph() const { return global_graph_;};
+
 const NavNodePtr& GetGoalNodePtr() const { return goal_node_ptr_;};
+void UpdateGlobalGraph(const NodePtrStack& graph) {global_graph_ = graph;};
 
 NodePtrStack insert_nav_nodes;
+bool is_divided_path = false;
 
 void IterativePathSearch(NodePtrStack& graph,
                         const NavNodePtr& odom_node_ptr,
                         const NavNodePtr& goal_node_ptr);
 
+void InsertNodes(const NavNodePtr& node_ptr1,
+                const NavNodePtr& node_ptr2);
+
+void GetDividedPath(const NodePtrStack& input_path, NodePtrStack& inserted_nodes);
+
 void ClearInsertNodes(const NodePtrStack& insert_nav_nodes);
+
+void UpdateConnectivityBetweenInsertNodes();
 
 
 };

@@ -14,8 +14,8 @@ enum NodeFreeDirect {
   CONVEX  =  1,
   CONCAVE =  2,
   PILLAR  =  3,
-  INSERT = 4,
-  TOP_LAYER = 1
+  INSERT = 4
+  // TOP_LAYER = 1
 };
 
 typedef std::pair<Point3D, Point3D> PointPair;
