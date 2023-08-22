@@ -83,6 +83,7 @@ struct NavNode
     CTNodePtr ctnode;
     bool is_contour_match;
     bool is_top_layer = false;
+    bool is_bottom_layer = false;
     bool is_inserted = false;
     bool is_odom;
     bool is_goal;

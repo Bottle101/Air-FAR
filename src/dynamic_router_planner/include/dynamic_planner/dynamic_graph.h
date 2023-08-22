@@ -452,7 +452,7 @@ public:
     }
 
     static inline bool IsConnectInVerticalConstrain(const NavNodePtr& node_ptr1, const NavNodePtr& node_ptr2) {
-        if (DPUtil::IsFreeNavNode(node_ptr1) || DPUtil::IsFreeNavNode(node_ptr2)) return true;
+        // if (DPUtil::IsFreeNavNode(node_ptr1) || DPUtil::IsFreeNavNode(node_ptr2)) return true;
         // check maximum vertical angle
         if (node_ptr1->layer_id != node_ptr2->layer_id) {
             const float v_angle = fabs((node_ptr2->position-node_ptr1->position).norm_dot(Point3D(0,0,1)));

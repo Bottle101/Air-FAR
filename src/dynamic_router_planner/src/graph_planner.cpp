@@ -468,7 +468,6 @@ void GraphPlanner::InsertNodes(const NavNodePtr& node_ptr1,
             }
         }
     }
-    ROS_ERROR("GP: insert nodes: %d", insert_nav_nodes.size());
     for (auto node_ptr : insert_nav_nodes) {
         // // connect between contour nodes and insert node
         // // if (node_ptr->contour_connects.size() == 0) continue;

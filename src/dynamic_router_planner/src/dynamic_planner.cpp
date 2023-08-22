@@ -30,6 +30,7 @@ void DPMaster::Init() {
   //DEBUG Publisher
   dynamic_obs_pub_     = nh.advertise<sensor_msgs::PointCloud2>("/DP_dynamic_obs_debug",1);
   surround_free_debug_ = nh.advertise<sensor_msgs::PointCloud2>("/DP_free_debug",1);
+  ground_pc_debug_ = nh.advertise<sensor_msgs::PointCloud2>("/DP_gnd_debug",1);
   surround_obs_debug_  = nh.advertise<sensor_msgs::PointCloud2>("/DP_obs_debug",1);
   scan_grid_debug_     = nh.advertise<sensor_msgs::PointCloud2>("/DP_scanGrid_debug",1);
 
@@ -491,10 +492,12 @@ void DPMaster::PrcocessCloud(const sensor_msgs::PointCloud2ConstPtr& pc,
       return;
     }
   }
+    planner_viz_.VizPointCloud(ground_pc_debug_,  cloudOut);  
   if (is_crop_cloud) {
     const Point3D crop_size(master_params_.sensor_range, master_params_.sensor_range, DPUtil::kTolerZ);
     DPUtil::CropBoxCloud(cloudOut, robot_pos_, crop_size);
   }
+
 }
 
 void DPMaster::ScanCallBack(const sensor_msgs::PointCloud2ConstPtr& scan_pc) {
@@ -506,7 +509,8 @@ void DPMaster::ScanCallBack(const sensor_msgs::PointCloud2ConstPtr& scan_pc) {
 void DPMaster::TerrainLocalCallBack(const sensor_msgs::PointCloud2ConstPtr& pc) {
   if (!master_params_.is_inter_navpoint || !master_params_.is_trajectory_edge) return;
   this->PrcocessCloud(pc, local_terrian_ptr_, false);
-  DPUtil::ExtractFreeAndObsCloud(local_terrian_ptr_, DPUtil::local_terrain_free_, DPUtil::local_terrain_obs_);
+  // DPUtil::ExtractFreeAndObsCloud(local_terrian_ptr_, DPUtil::local_terrain_free_, DPUtil::local_terrain_obs_);
+
 }
 
 void DPMaster::TerrainCallBack(const sensor_msgs::PointCloud2ConstPtr& pc) {
@@ -563,6 +567,7 @@ void DPMaster::TerrainCallBack(const sensor_msgs::PointCloud2ConstPtr& pc) {
   if (!is_robot_stop_ || !is_graph_init_) {
     planner_viz_.VizPointCloud(surround_free_debug_, DPUtil::surround_free_cloud_);
     planner_viz_.VizPointCloud(surround_obs_debug_,  DPUtil::surround_obs_cloud_);
+    // planner_viz_.VizPointCloud(ground_pc_debug_,  DPUtil::cur_scan_cloud_);
     // visualize map grid
     PointStack neighbor_centers, occupancy_centers;
     map_handler_.GetNeighborCeilsCenters(neighbor_centers);

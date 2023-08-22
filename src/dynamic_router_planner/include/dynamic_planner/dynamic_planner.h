@@ -44,7 +44,7 @@ private:
     ros::Subscriber odom_sub_, terrain_sub_, terrian_local_sub_, scan_sub_, waypoint_sub_;
     ros::Publisher  goal_pub_;
     ros::Publisher  vertices_PCL_pub_, obs_world_pub_, new_PCL_pub_;
-    ros::Publisher  dynamic_obs_pub_, surround_free_debug_, surround_obs_debug_, scan_grid_debug_;
+    ros::Publisher  dynamic_obs_pub_, surround_free_debug_, surround_obs_debug_, scan_grid_debug_, ground_pc_debug_;
 
     ros::Publisher mapping_time_pub_;
 

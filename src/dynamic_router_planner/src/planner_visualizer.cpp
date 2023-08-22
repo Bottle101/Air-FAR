@@ -183,7 +183,7 @@ void DPVisualizer::VizGraph(const NodePtrStack& graph) {
     MarkerArray graph_marker_array;
     Marker nav_node_marker, unfinal_node_marker, reachable_node_marker, near_node_marker, covered_node_marker, internav_node_marker, 
            edge_marker, contour_edge_marker, odom_edge_marker, goal_edge_marker, trajectory_edge_marker,
-           corner_surf_marker, contour_align_marker, corner_helper_marker, top_node_marker, top_contour_marker, insert_node_marker;
+           corner_surf_marker, contour_align_marker, corner_helper_marker, top_node_marker, top_contour_marker, bottom_contour_marker, insert_node_marker;
     nav_node_marker.type       = Marker::SPHERE_LIST;
     unfinal_node_marker.type   = Marker::SPHERE_LIST;
     reachable_node_marker.type = Marker::SPHERE_LIST;
@@ -200,6 +200,7 @@ void DPVisualizer::VizGraph(const NodePtrStack& graph) {
     trajectory_edge_marker.type = Marker::LINE_LIST;
     corner_surf_marker.type    = Marker::LINE_LIST;
     top_contour_marker.type    = Marker::LINE_LIST;
+    bottom_contour_marker.type = Marker::LINE_LIST;
     corner_helper_marker.type  = Marker::CUBE_LIST;
     this->SetMarker(VizColor::WHITE,   "graph_node",     0.5f,  0.5f,  nav_node_marker);
     this->SetMarker(VizColor::RED,     "unfinal_node",   0.5f,  0.8f,  unfinal_node_marker);
@@ -216,7 +217,8 @@ void DPVisualizer::VizGraph(const NodePtrStack& graph) {
     this->SetMarker(VizColor::YELLOW,  "surf_direct",    0.25f, 0.75f, corner_helper_marker);
     this->SetMarker(VizColor::RED,     "contour_align",  0.1f,  0.5f,  contour_align_marker);
     this->SetMarker(VizColor::RED,     "top_node",       0.5f,  0.5f,  top_node_marker);
-    this->SetMarker(VizColor::GREEN,     "top_contour",    0.2f,  0.2f, top_contour_marker);
+    this->SetMarker(VizColor::GREEN,   "top_contour",    0.2f,  0.2f, top_contour_marker);
+    this->SetMarker(VizColor::WHITE,   "bottom_contour", 0.2f,  0.2f, bottom_contour_marker);
     this->SetMarker(VizColor::PURPLE,  "insert_node",    0.5f,  0.5f,  insert_node_marker);
 
     /* Lambda Function */
@@ -246,10 +248,10 @@ void DPVisualizer::VizGraph(const NodePtrStack& graph) {
                 odom_edge_marker.points.push_back(p1);
                 odom_edge_marker.points.push_back(p2);
             } else {
-                if (cnode->is_inserted || node_ptr->is_inserted) {
+                // if (cnode->is_inserted || node_ptr->is_inserted) {
                 edge_marker.points.push_back(p1);
                 edge_marker.points.push_back(p2);                    
-                }                
+                // }                
             }
         }
         // contour edges
@@ -272,6 +274,18 @@ void DPVisualizer::VizGraph(const NodePtrStack& graph) {
                 p2 = DPUtil::Point3DToGeoMsgPoint(ct_cnode->position);
                 top_contour_marker.points.push_back(p1);
                 top_contour_marker.points.push_back(p2);
+            }
+        }
+        // bottom layer contour edges
+        if (node_ptr->is_bottom_layer) {
+            for (const auto& ct_cnode : node_ptr->contour_connects) {
+                if (ct_cnode == NULL) {
+                    ROS_WARN("Viz: node bottom layer contour connect to a NULL node");
+                    continue;
+                } else if (ct_cnode == node_ptr->up_node) continue;
+                p2 = DPUtil::Point3DToGeoMsgPoint(ct_cnode->position);
+                bottom_contour_marker.points.push_back(p1);
+                bottom_contour_marker.points.push_back(p2);
             }
         }
         // inter navigation trajectory connections
@@ -320,7 +334,7 @@ void DPVisualizer::VizGraph(const NodePtrStack& graph) {
         // if (nav_node_ptr->up_node == NULL && nav_node_ptr->down_node != NULL && nav_node_ptr->free_direct == NodeFreeDirect::CONVEX) {
         //     top_node_marker.points.push_back(cpoint);
         // }
-        if (nav_node_ptr->is_inserted) {
+        if (nav_node_ptr->is_inserted || nav_node_ptr->is_wall_insert) {
             insert_node_marker.points.push_back(cpoint);
         }
         // if (nav_node_ptr->is_top_layer == true) {
@@ -339,9 +353,9 @@ void DPVisualizer::VizGraph(const NodePtrStack& graph) {
         if (nav_node_ptr->is_navpoint) {
             internav_node_marker.points.push_back(cpoint);
         }
-        // if (nav_node_ptr->is_near_nodes) {
-        //     near_node_marker.points.push_back(cpoint);
-        // }
+        if (nav_node_ptr->is_near_nodes) {
+            near_node_marker.points.push_back(cpoint);
+        }
         if (!nav_node_ptr->is_frontier) {
             covered_node_marker.points.push_back(cpoint);
         }
@@ -367,6 +381,7 @@ void DPVisualizer::VizGraph(const NodePtrStack& graph) {
     graph_marker_array.markers.push_back(contour_align_marker);
     graph_marker_array.markers.push_back(top_node_marker);
     graph_marker_array.markers.push_back(top_contour_marker);
+    graph_marker_array.markers.push_back(bottom_contour_marker);
     graph_marker_array.markers.push_back(insert_node_marker);
     viz_graph_pub_.publish(graph_marker_array);
 }

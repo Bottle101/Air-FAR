@@ -115,12 +115,10 @@ void ContourGraph::MatchContourWithNavGraph(const NodePtrStack& nav_graph,
         for (const auto& ctnode_ptr : ContourGraph::multi_contour_graph_[layer_id]) {
             if (!ctnode_ptr->is_global_match && ctnode_ptr->free_direct != NodeFreeDirect::UNKNOW) {
                 // check wall contour
-
                 if (ctnode_ptr->free_direct != NodeFreeDirect::PILLAR && !ctnode_ptr->is_wall_insert) {
                     const float dot_value = ctnode_ptr->surf_dirs.first * ctnode_ptr->surf_dirs.second;
                     if (dot_value < ALIGN_ANGLE_COS) continue; // wall detected
                 }
-                
                 new_convex_vertices.push_back(ctnode_ptr);
             }
         }

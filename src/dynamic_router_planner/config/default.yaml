@@ -1,5 +1,5 @@
 # Dynamic Planner Default Params
-main_run_freq                           : 2.5
+main_run_freq                           : 5.0
 voxel_dim                               : 0.2   # Unit: meter
 robot_dim                               : 0.8   # Unit: meter
 vehicle_height                          : 0.5   # Unit: meter
@@ -60,7 +60,7 @@ CDetector/is_save_img                   : true
 CDetector/img_folder_path               : /home/bottle/hbt_ws/AirFar_dev/data/contour_campus/revised/
 
 # Graph Planner Params
-GPlanner/converge_distance              : 0.5
+GPlanner/converge_distance              : 1.5
 GPlanner/goal_adjust_radius             : 5.0
 GPlanner/goal_z_tolerance               : 2.0
 GPlanner/free_counter_thred             : 7
