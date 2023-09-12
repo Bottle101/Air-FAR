@@ -548,10 +548,6 @@ void GraphPlanner::ClearInsertNodes(const NodePtrStack& inodes) {
     }
 
     global_graph_.clear();
-
-    
-
-    // inodes.clear();
 }
 
 

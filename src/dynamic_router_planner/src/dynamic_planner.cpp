@@ -166,6 +166,7 @@ void DPMaster::Loop() {
         new_nodes_ = graph_manager_.GetNewNodes();
         ROS_INFO("DPMaster: Potential nav nodes has been extracted: %ld", new_nodes_.size());
       }
+      planner_viz_.VizNodes(new_nodes_, "new_nodes", VizColor::YELLOW);
       /* Graph Updating */
       graph_manager_.UpdateNavGraph(new_nodes_, clear_nodes_);
       mapping_timer.data = DPUtil::Timer.end_time("Graph_mapping");
@@ -424,6 +425,9 @@ void DPMaster::LoadROSParams() {
   nh.param<int>(contour_prefix + "KDTree_neighbor_size", cg_params_.knn_search_num_, 1);
   nh.param<float>(contour_prefix + "KNN_search_radius", cg_params_.knn_search_radius_, 1.5);
   nh.param<float>(contour_prefix + "wall_insert_factor", cg_params_.wall_insert_factor, 0.6);
+  cg_params_.voxel_dim = master_params_.voxel_dim;
+  graph_params_.wall_insert_factor = cg_params_.wall_insert_factor;
+
 }
 
 void DPMaster::OdomCallBack(const nav_msgs::OdometryConstPtr& msg) {
@@ -468,7 +472,6 @@ void DPMaster::PrcocessCloud(const sensor_msgs::PointCloud2ConstPtr& pc,
                              const PointCloudPtr& cloudOut,
                              const bool& is_crop_cloud) 
 {
-
   pcl::PointCloud<PCLPoint> temp_cloud;
   pcl::fromROSMsg(*pc, temp_cloud);
   cloudOut->clear(), *cloudOut = temp_cloud;

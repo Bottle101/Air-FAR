@@ -219,7 +219,7 @@ void DPVisualizer::VizGraph(const NodePtrStack& graph) {
     this->SetMarker(VizColor::RED,     "top_node",       0.5f,  0.5f,  top_node_marker);
     this->SetMarker(VizColor::GREEN,   "top_contour",    0.2f,  0.2f, top_contour_marker);
     this->SetMarker(VizColor::WHITE,   "bottom_contour", 0.2f,  0.2f, bottom_contour_marker);
-    this->SetMarker(VizColor::PURPLE,  "insert_node",    0.5f,  0.5f,  insert_node_marker);
+    this->SetMarker(VizColor::RED,  "insert_node",    0.5f,  0.5f,  insert_node_marker);
 
     /* Lambda Function */
     auto Draw_Contour_Align = [&](const NavNodePtr& node_ptr) {
@@ -248,10 +248,10 @@ void DPVisualizer::VizGraph(const NodePtrStack& graph) {
                 odom_edge_marker.points.push_back(p1);
                 odom_edge_marker.points.push_back(p2);
             } else {
-                // if (cnode->is_inserted || node_ptr->is_inserted) {
+                if (cnode->is_wall_insert || node_ptr->is_wall_insert) {
                 edge_marker.points.push_back(p1);
                 edge_marker.points.push_back(p2);                    
-                // }                
+                }                
             }
         }
         // contour edges

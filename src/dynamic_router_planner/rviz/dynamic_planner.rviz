@@ -10,9 +10,8 @@ Panels:
         - /Node1/Namespaces1
         - /Contour1/Namespaces1
         - /MarkerArray1/Namespaces1
-        - /PointCloud21
-        - /PointCloud22
-        - /PointCloud23
+        - /Marker1
+        - /Marker1/Namespaces1
       Splitter Ratio: 0.5941176414489746
     Tree Height: 892
   - Class: rviz/Selection
@@ -584,7 +583,14 @@ Visualization Manager:
       Marker Topic: /viz_contour_topic
       Name: Contour
       Namespaces:
-        {}
+        contour: true
+        contour_direct: true
+        contour_surf: true
+        contour_vertex: true
+        global_contour: true
+        matched_vertex: true
+        top_layer_vertex: true
+        wall_corner_marker: true
       Queue Size: 100
       Value: true
     - Class: rviz/MarkerArray
@@ -723,6 +729,15 @@ Visualization Manager:
       Use Fixed Frame: true
       Use rainbow: true
       Value: false
+    - Class: rviz/Marker
+      Enabled: true
+      Marker Topic: /viz_node_topic
+      Name: Marker
+      Namespaces:
+        clear_nodes: true
+        new_nodes: true
+      Queue Size: 100
+      Value: true
   Enabled: true
   Global Options:
     Background Color: 0; 0; 0
@@ -742,7 +757,7 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 80.34302520751953
+      Distance: 75.60920715332031
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
@@ -750,17 +765,17 @@ Visualization Manager:
         Value: false
       Field of View: 0.7853981852531433
       Focal Point:
-        X: 27.300628662109375
-        Y: 66.04293823242188
-        Z: -23.08997344970703
+        X: 36.945953369140625
+        Y: 9.443093299865723
+        Z: -18.10316276550293
       Focal Shape Fixed Size: false
       Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 0.6497975587844849
+      Pitch: 1.1197971105575562
       Target Frame: map
-      Yaw: 4.557555675506592
+      Yaw: 3.1125316619873047
     Saved: ~
 Window Geometry:
   ControlPanel:

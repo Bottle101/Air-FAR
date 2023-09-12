@@ -1,9 +1,9 @@
 # Dynamic Planner Default Params
-main_run_freq                           : 15
+main_run_freq                           : 10
 voxel_dim                               : 0.15   # Unit: meter
 robot_dim                               : 0.8   # Unit: meter
 vehicle_height                          : 0.5  # Unit: meter
-sensor_range                            : 10.0   # Unit: meter
+sensor_range                            : 30.0   # Unit: meter
 reproject_dist                          : 2.5   # Unit: meter
 layer_resoltion                         : 0.75
 neighbor_layer_num                      : 1
@@ -26,8 +26,8 @@ MapHandler/map_grad_max_height          : 10.0   # Unit: meter
 ScanHandler/inflate_scan_size           : 3
 
 # Dynamic Planner Utility Params
-Util/angle_noise                        : 12.0  # Unit: degree
-Util/accept_max_align_angle             : 12.0  # Unit: degree
+Util/angle_noise                        : 20.0  # Unit: degree
+Util/accept_max_align_angle             : 20.0  # Unit: degree
 Util/new_intensity_thred                : 2.0
 Util/nav_clear_dist                     : 0.35  # Unit: degree
 Util/terrain_free_Z                     : 0.2
@@ -37,9 +37,9 @@ Util/inflate_counter                    : 1
 Util/dynamic_obs_dacay_time             : 10.0
 
 # Dynamic Graph Params
-Graph/node_near_dist                    : 1.5   # Unit: meter
+Graph/node_near_dist                    : 0.5   # Unit: meter
 Graph/move_thred                        : 0.1  # Unit: meter
-Graph/connect_votes_size                : 5
+Graph/connect_votes_size                : 3
 Graph/trajectory_interval_ratio         : 2.5
 Graph/terrain_inflate_size              : 3           
 Graph/clear_dumper_thred                : 4
@@ -71,10 +71,10 @@ GPlanner/path_momentum_thred            : 5
 GPlanner/clear_inflate_size             : 3
 
 # Contour Graph Params
-ContourGraph/around_distance            : 0.35 # Unit: meter
+ContourGraph/around_distance            : 0.5 # Unit: meter
 ContourGraph/pillar_perimeter_dist      : 1.5  # Unit: meter
 ContourGraph/KDTree_num                 : 8
 ContourGraph/KDTree_neighbor_size       : 1
 ContourGraph/KNN_search_radius          : 2.0  # Unit: meter
-ContourGraph/wall_insert_factor         : 0.6 
+ContourGraph/wall_insert_factor         : 0.5 
 

@@ -20,6 +20,7 @@ struct DynamicGraphParams {
     float kConnectAngleThred;
     float filter_pos_margin;
     float filter_dirs_margin;
+    float wall_insert_factor;
 };
 
 class DynamicGraph {  
@@ -57,6 +58,7 @@ private:
     void ReEvaluateConvexity(const NavNodePtr& node_ptr);
 
     bool IsOldNodesAround(const CTNodePtr& ctnode, const float& radius);
+    bool IsOldWallNodesAround(const CTNodePtr& ctnode, const float& radius);
 
     /* Merge two nodes in Graph into one remain node, (mark one node as merged)*/
     void MergeNodeInGraph(const NavNodePtr& node_ptr1, 
@@ -240,6 +242,7 @@ private:
     }
 
     inline bool IsConnectedNewNode(const NavNodePtr& node_ptr) {
+
         if (DPUtil::IsFreeNavNode(node_ptr) || IsConnectedNode(node_ptr)) return true; 
         return false;
     }

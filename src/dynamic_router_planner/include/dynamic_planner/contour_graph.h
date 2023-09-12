@@ -31,6 +31,7 @@ struct ContourGraphParams {
     int knn_search_num_;
     float knn_search_radius_;
     float wall_insert_factor;
+    float voxel_dim;
 };
 
 class ContourGraph {

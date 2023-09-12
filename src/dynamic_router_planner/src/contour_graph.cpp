@@ -51,7 +51,7 @@ void ContourGraph::UpdateContourGraph(const NavNodePtr& odom_node_ptr,
             CTNodeStack ctnode_stack;
             ctnode_stack.clear();
             const int N = poly_ptr->vertices.size();
-            for (std::size_t idx=0; idx<N; idx++) {
+            for (std::size_t idx=0; idx<N; idx++) { 
                 this->CreateCTNode(poly_ptr->vertices[idx], layer_idx, new_ctnode_ptr, poly_ptr, false);
                 ctnode_stack.push_back(new_ctnode_ptr);
             }
@@ -63,20 +63,15 @@ void ContourGraph::UpdateContourGraph(const NavNodePtr& odom_node_ptr,
                 ctnode_stack[idx]->back = ctnode_stack[ref_idx];
 
                 // check if the contour node is a wall corner
-                if (!ctnode_stack[idx]->is_wall_corner || !ctnode_stack[idx]->front->is_wall_corner) {
-                    if ((ctnode_stack[idx]->front->position - ctnode_stack[idx]->position).norm() > DPUtil::kSensorRange*ctgraph_params_.wall_insert_factor) {
+                if (!ctnode_stack[idx]->is_wall_corner) {
+                    if ((ctnode_stack[idx]->front->position - ctnode_stack[idx]->position).norm() > DPUtil::kSensorRange*ctgraph_params_.wall_insert_factor &&
+                    (ctnode_stack[idx]->position - odom_node_ptr_->position).norm() < (ctnode_stack[idx]->front->position - odom_node_ptr_->position).norm()-20.0*ctgraph_params_.voxel_dim) {
                         SetWallCornerNodes(ctnode_stack[idx], ctnode_stack[idx]->front, layer_idx);
-                        // DEBUG
-                        // std::cout << "Wall corner distance: " << std::max((ctnode_stack[idx]->front->position - ctnode_stack[idx]->position).norm(), 
-                        // (ctnode_stack[idx]->back->position - ctnode_stack[idx]->position).norm()) << std::endl;
-                        // if ((ctnode_stack[idx]->front->position - ctnode_stack[idx]->position).norm()>20)
-                        //     cout<<"Interval illegal: "<<(ctnode_stack[idx]->front->position - ctnode_stack[idx]->position).norm()<<endl;
-                        // else
-                        //     cout<<"Interval Legal: "<<(ctnode_stack[idx]->front->position - ctnode_stack[idx]->position).norm()<<endl;
                     }
-                    // if ((ctnode_stack[idx]->back->position - ctnode_stack[idx]->position).norm() > DPUtil::kSensorRange*ctgraph_params_.wall_insert_factor && !ctnode_stack[idx]->back->is_wall_corner) {
-                    //     SetWallCornerNodes(ctnode_stack[idx], ctnode_stack[idx]->back, layer_idx);
-                    // }
+                    if ((ctnode_stack[idx]->back->position - ctnode_stack[idx]->position).norm() > DPUtil::kSensorRange*ctgraph_params_.wall_insert_factor &&
+                    (ctnode_stack[idx]->position - odom_node_ptr_->position).norm() < (ctnode_stack[idx]->back->position - odom_node_ptr_->position).norm()-20.0*ctgraph_params_.voxel_dim) {
+                        SetWallCornerNodes(ctnode_stack[idx], ctnode_stack[idx]->back, layer_idx);
+                    }
                 }
                 this->AddCTNodeToGraph(ctnode_stack[idx], layer_idx);
             }
@@ -102,6 +97,12 @@ void ContourGraph::MatchContourWithNavGraph(const NodePtrStack& nav_graph,
             ctnode_ptr->nav_node_id = 0; // note: 0 is the id of odom node 
             if (ctnode_ptr->free_direct != NodeFreeDirect::UNKNOW) {
                 const NavNodePtr matched_node = this->NearestNavNodeForCTNode(ctnode_ptr, nav_graph, layer_id);                     
+
+                // if (ctnode_ptr->is_wall_insert && matched_node != NULL)
+                //     cout<<"CG: WALL CONTOUR MATCHED"<< endl;
+                // else if (ctnode_ptr->is_wall_insert && matched_node == NULL)
+                //     cout<<"CG: WALL CONTOUR NULL"<< endl;
+
                 if (matched_node != NULL) {
                     ctnode_ptr->is_global_match = true;
                     ctnode_ptr->nav_node_id = matched_node->id;
@@ -265,6 +266,7 @@ bool ContourGraph::IsCTNodesConnectFromContour(const CTNodePtr& ctnode1, const C
     if (ctnode1 == ctnode2 || ctnode1->poly_ptr != ctnode2->poly_ptr) return false;
     // forward search
     CTNodePtr next_ctnode = ctnode1->front; 
+    CTNodePtr last_ctnode = ctnode1;
     while (next_ctnode != NULL && next_ctnode != ctnode1) {
         if (next_ctnode == ctnode2) {
             return true;
@@ -273,7 +275,12 @@ bool ContourGraph::IsCTNodesConnectFromContour(const CTNodePtr& ctnode1, const C
         {
             break;
         } else {
-            next_ctnode = next_ctnode->front;
+            CTNodePtr tmp_ctnode = next_ctnode->front;
+            if (tmp_ctnode == last_ctnode) {
+                next_ctnode = next_ctnode->back;
+            } else {
+                next_ctnode = next_ctnode->front;                
+            }
         }
     }
     // backward search
@@ -286,7 +293,12 @@ bool ContourGraph::IsCTNodesConnectFromContour(const CTNodePtr& ctnode1, const C
         {
             break;
         } else {
-            next_ctnode = next_ctnode->back;
+            CTNodePtr tmp_ctnode = next_ctnode->back;
+            if (tmp_ctnode == last_ctnode) {
+                next_ctnode = next_ctnode->front;
+            } else {
+                next_ctnode = next_ctnode->back;                
+            }
         }
     }
     return false;
@@ -426,6 +438,13 @@ bool ContourGraph::IsAPillarPolygon(const PointStack& vertex_points) {
 bool ContourGraph::IsEdgeCollideSegment(const PointPair& line, const ConnectPair& edge) {
     const cv::Point2f start_p(line.first.x, line.first.y);
     const cv::Point2f end_p(line.second.x, line.second.y);
+
+    // cv::Point2f vec1 = end_p - start_p;
+    // cv::Point2f vec2 = edge.end_p - edge.start_p;
+    // vec1 = vec1 / cv::norm(vec1);
+    // vec2 = vec2 / cv::norm(vec2);
+    // float cos_value = vec1.x * vec2.x + vec1.y * vec2.y;
+    // if (cos_value > this->ALIGN_ANGLE_COS) return false;
     if (POLYOPS::doIntersect(start_p, end_p, edge.start_p, edge.end_p)) {
         return true;
     }
@@ -615,7 +634,8 @@ void ContourGraph::ConnectVerticalEdges(const int& layer_id) {
 
         for (const auto& index : indices) {
             const auto& neighbor_ptr = multi_contour_graph_[layer_id+1][index];
-            if (node_ptr->free_direct == neighbor_ptr->free_direct && (node_ptr->position - neighbor_ptr->position).norm() < 3.0) {
+            if (node_ptr->free_direct == NodeFreeDirect::PILLAR || neighbor_ptr->free_direct == NodeFreeDirect::PILLAR) continue;
+            if (node_ptr->free_direct == neighbor_ptr->free_direct && (node_ptr->position - neighbor_ptr->position).norm() < 2.0) {
                 const Point3D node_dir = DPUtil::SurfTopoDirect(node_ptr->surf_dirs);
                 const Point3D neighbor_dir = DPUtil::SurfTopoDirect(neighbor_ptr->surf_dirs);
 
@@ -634,7 +654,6 @@ void ContourGraph::ConnectVerticalEdges(const int& layer_id) {
 
 void ContourGraph::SetWallCornerNodes(const CTNodePtr& node_ptr1, const CTNodePtr& node_ptr2, const int& layer_idx) {
     // if (node_ptr1->is_wall_corner || node_ptr2->is_wall_corner) {ROS_ERROR("SetWallCornerNodes: node_ptr1 or node_ptr2 is already wall corner node"); return;}
-    if (node_ptr1->is_wall_corner) {ROS_ERROR("SetWallCornerNodes: node_ptr1 or node_ptr2 is already wall corner node"); return;}
 
     node_ptr1->is_wall_corner = true;
     // node_ptr2->is_wall_corner = true;
@@ -646,18 +665,23 @@ void ContourGraph::SetWallCornerNodes(const CTNodePtr& node_ptr1, const CTNodePt
     {
         if (InsertWallNodes(start, end, layer_idx)) {
             is_insert_finished = true;
-        } else {
-            if (InsertWallNodes(end, start, layer_idx)) {
-                is_insert_finished = true;
-            }
         }
+
+
+        // if (InsertWallNodes(start, end, layer_idx)) {
+        //     is_insert_finished = true;
+        // } else {
+        //     // if (InsertWallNodes(end, start, layer_idx)) {
+        //     //     is_insert_finished = true;
+        //     // }
+        // }
     }
 }
 
 bool ContourGraph::InsertWallNodes(CTNodePtr& start, CTNodePtr& end, const int& layer_idx) {
     // insert nodes from node2 side
     Point3D dir = (end->position - start->position).normalize();
-    Point3D insert_node = start->position + dir * DPUtil::kSensorRange*ctgraph_params_.wall_insert_factor*0.9;
+    Point3D insert_node = start->position + dir * DPUtil::kSensorRange*ctgraph_params_.wall_insert_factor;
     CTNodePtr insert_node_ptr = NULL;
     CreateCTNode(insert_node, start->layer_id, insert_node_ptr, start->poly_ptr, false);
     insert_node_ptr->free_direct = NodeFreeDirect::INSERT;
@@ -668,6 +692,8 @@ bool ContourGraph::InsertWallNodes(CTNodePtr& start, CTNodePtr& end, const int& 
         end->back = insert_node_ptr;
         insert_node_ptr->back = start;
         insert_node_ptr->is_wall_insert = true;
+        insert_node_ptr->poly_ptr->is_connect = true;
+        // insert_node_ptr->is_global_match = true;
         start->poly_ptr->vertices.push_back(insert_node_ptr->position);
 
         this->AddCTNodeToGraph(insert_node_ptr, layer_idx);
@@ -677,12 +703,15 @@ bool ContourGraph::InsertWallNodes(CTNodePtr& start, CTNodePtr& end, const int& 
             // cout<<"Current dis: "<<(start->position - end->position).norm()<<endl;
             return false;
         }
-    } else if (start->back == end) {
+    } 
+    else if (start->back == end) {
         end->front = insert_node_ptr;
         insert_node_ptr->front = start;
         start->back = insert_node_ptr;
         insert_node_ptr->back = end;
         insert_node_ptr->is_wall_insert = true;
+        insert_node_ptr->poly_ptr->is_connect = true;
+        // insert_node_ptr->is_global_match = true;
         start->poly_ptr->vertices.push_back(insert_node_ptr->position);
 
         this->AddCTNodeToGraph(insert_node_ptr, layer_idx);
@@ -692,10 +721,11 @@ bool ContourGraph::InsertWallNodes(CTNodePtr& start, CTNodePtr& end, const int& 
             // cout<<"Current dis: "<<(start->position - end->position).norm()<<endl;
             return false;
         }
-    } else {
-        ROS_ERROR("InsertWallNodes: start and end node are not connected");
-        return false;
-    }
+    } 
+    // else {
+    //     ROS_ERROR("InsertWallNodes: start and end node are not connected");
+    //     return false;
+    // }
     // cout<<"EXIT dis: "<<(start->position - end->position).norm()<<endl;
     return true;
 
