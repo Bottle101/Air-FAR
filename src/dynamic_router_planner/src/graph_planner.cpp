@@ -136,10 +136,10 @@ void GraphPlanner::UpdateGoalNavNodeConnects(const NavNodePtr& goal_node_ptr)
 }
 
 bool GraphPlanner::IsValidConnectToOdom(const NavNodePtr& node_ptr, const NavNodePtr& odom_node_ptr) {
-    ROS_WARN("GP: Is valid connect to odom");
-    cout<<DynamicGraph::IsConnectInVerticalConstrain(node_ptr, odom_node_ptr)<<endl;
-    cout<<ContourGraph::IsNavToOdomConnectFreePolygon(node_ptr, odom_node_ptr)<<endl;
-    ROS_WARN("=================================");
+    // ROS_WARN("GP: Is valid connect to odom");
+    // cout<<DynamicGraph::IsConnectInVerticalConstrain(node_ptr, odom_node_ptr)<<endl;
+    // cout<<ContourGraph::IsNavToOdomConnectFreePolygon(node_ptr, odom_node_ptr)<<endl;
+    // ROS_WARN("=================================");
     if (DynamicGraph::IsConnectInVerticalConstrain(node_ptr, odom_node_ptr) && 
         ContourGraph::IsNavToOdomConnectFreePolygon(node_ptr, odom_node_ptr))
     {
