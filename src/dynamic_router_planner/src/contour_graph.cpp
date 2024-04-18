@@ -240,31 +240,31 @@ bool ContourGraph::IsNavToGoalConnectFreePolygon(const NavNodePtr& node_ptr, con
 
     if (node_ptr->layer_id <= goal_ptr->layer_id) {
         cedge = ContourGraph::ReprojectEdge(node_ptr, goal_ptr, DPUtil::kNavClearDist, false);
-        cedge2 = ContourGraph::ReprojectEdge(node_ptr, goal_ptr, DPUtil::kNavClearDist, true);
+        // cedge2 = ContourGraph::ReprojectEdge(node_ptr, goal_ptr, DPUtil::kNavClearDist, true);
         cedge.start_p = cedge.start_p + diff2d;
-        cedge2.start_p = cedge2.start_p + diff2d;
+        // cedge2.start_p = cedge2.start_p + diff2d;
         start_layer = node_ptr->layer_id, end_layer = goal_ptr->layer_id;
     } else {
         cedge = ContourGraph::ReprojectEdge(goal_ptr, node_ptr, DPUtil::kNavClearDist, false);
-        cedge2 = ContourGraph::ReprojectEdge(goal_ptr, node_ptr, DPUtil::kNavClearDist, true);
-        cedge.end_p = cedge.end_p;
-        cedge2.end_p = cedge2.end_p + diff2d;
+        // cedge2 = ContourGraph::ReprojectEdge(goal_ptr, node_ptr, DPUtil::kNavClearDist, true);
+        cedge.end_p = cedge.end_p + diff2d;
+        // cedge2.end_p = cedge2.end_p + diff2d;
         start_layer = goal_ptr->layer_id, end_layer = node_ptr->layer_id;
     }
 
     const bool is_global_check = ContourGraph::IsNeedGlobalCheck(node_ptr->position, goal_ptr->position, DPUtil::odom_pos);
     if (node_ptr->is_inserted) {
         // print cedge use roswarn
-        // ROS_WARN("start_p: %f, %f", cedge.start_p.x, cedge.start_p.y);
-        // ROS_WARN("end_p: %f, %f", cedge.end_p.x, cedge.end_p.y);
-        // ROS_WARN("==============================");
+        ROS_ERROR("start_p: %f, %f", cedge.start_p.x, cedge.start_p.y);
+        ROS_ERROR("end_p: %f, %f", cedge.end_p.x, cedge.end_p.y);
+        ROS_WARN("==============================");
         // ROS_WARN("start_p2: %f, %f", cedge2.start_p.x, cedge2.start_p.y);
         // ROS_WARN("end_p2: %f, %f", cedge2.end_p.x, cedge2.end_p.y);
         // print diff2d
         // ROS_WARN("diff2d: %f, %f", diff2d.x, diff2d.y);
-        // return ContourGraph::IsPointsConnectFreePolygonTest(cedge, start_layer, end_layer, is_global_check, false);
-        return (ContourGraph::IsPointsConnectFreePolygonTest(cedge, start_layer, end_layer, is_global_check, false) || 
-        ContourGraph::IsPointsConnectFreePolygonTest(cedge2, start_layer, end_layer, is_global_check, false));
+        return ContourGraph::IsPointsConnectFreePolygonTest(cedge, start_layer, end_layer, is_global_check, false);
+        // return (ContourGraph::IsPointsConnectFreePolygonTest(cedge, start_layer, end_layer, is_global_check, false) || 
+        // ContourGraph::IsPointsConnectFreePolygonTest(cedge2, start_layer, end_layer, is_global_check, false));
     } else {
         return ContourGraph::IsPointsConnectFreePolygon(cedge, start_layer, end_layer, is_global_check, false);
     }
@@ -349,14 +349,17 @@ bool ContourGraph::IsPointsConnectFreePolygonTest(const ConnectPair& cedge,
             if (ContourGraph::IsEdgeCollidePoly(poly_ptr->vertices, check_edge)) {
 
                 // // DEBUG
-                // const int N = poly.size();
-                // if (N < 3) cout<<"Poly vertex size less than 3."<<endl;
-                // for (int i=0; i<N; i++) {
-                //     const PointPair line(poly[i], poly[DPUtil::Mod(i+1, N)]);
-                //     if (ContourGraph::IsEdgeCollideSegment(line, edge)) {
-                //         return true;
-                //     }
-                // }
+                const int N = poly_ptr->vertices.size();
+                for (int i=0; i<N; i++) {
+                    const PointPair line(poly_ptr->vertices[i], poly_ptr->vertices[DPUtil::Mod(i+1, N)]);
+                    if (ContourGraph::IsEdgeCollideSegment(line, check_edge)) {
+                        // print line and edge
+                        ROS_WARN("line start: %f, %f", line.first.x, line.first.y);
+                        ROS_WARN("line end: %f, %f", line.second.x, line.second.y);
+                        ROS_WARN("edge start: %f, %f", check_edge.start_p.x, check_edge.start_p.y);
+                        ROS_WARN("edge end: %f, %f", check_edge.end_p.x, check_edge.end_p.y);
+                    }
+                }
 
 
 
@@ -832,7 +835,7 @@ bool ContourGraph::InsertWallNodes(CTNodePtr& start, CTNodePtr& end, const int& 
         insert_node_ptr->is_wall_insert = true;
         insert_node_ptr->poly_ptr->is_connect = true;
         // insert_node_ptr->is_global_match = true;
-        start->poly_ptr->vertices.push_back(insert_node_ptr->position);
+        // start->poly_ptr->vertices.push_back(insert_node_ptr->position);
 
         this->AddCTNodeToGraph(insert_node_ptr, layer_idx);
         start = insert_node_ptr;
@@ -850,7 +853,7 @@ bool ContourGraph::InsertWallNodes(CTNodePtr& start, CTNodePtr& end, const int& 
         insert_node_ptr->is_wall_insert = true;
         insert_node_ptr->poly_ptr->is_connect = true;
         // insert_node_ptr->is_global_match = true;
-        start->poly_ptr->vertices.push_back(insert_node_ptr->position);
+        // start->poly_ptr->vertices.push_back(insert_node_ptr->position);
 
         this->AddCTNodeToGraph(insert_node_ptr, layer_idx);
         start = insert_node_ptr;
