@@ -38,7 +38,7 @@ public:
   virtual void save( rviz::Config config ) const;
 
 public Q_SLOTS:
-  void setVel( float linear_velocity_, float angular_velocity_, bool mouse_pressed_ );
+  void setVel( float linear_velocity_, float angular_velocity_, bool mouse_pressed_, float z_velocity_);
 
 protected Q_SLOTS:
   void pressButton1();
@@ -70,6 +70,7 @@ protected:
   float angular_velocity_;
   bool mouse_pressed_;
   bool mouse_pressed_sent_;
+  float z_velocity_;
 };
 
 }

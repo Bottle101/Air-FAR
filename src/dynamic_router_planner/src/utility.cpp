@@ -443,7 +443,7 @@ Point3D DPUtil::SurfTopoDirect(const PointPair& dirs, bool& _is_wall) {
   Point3D topo_dir = dirs.first + dirs.second;
   topo_dir.z = 0.0;
   _is_wall = false;
-  if (topo_dir.norm() < DPUtil::kEpsilon) {
+  if (topo_dir.norm() <= 2*DPUtil::kEpsilon) {
     ROS_WARN_THROTTLE(1.0, "DP: surface topo direction creation fails, mark convexity as unknown.");
     _is_wall = true;
     return Point3D(0,0,0);

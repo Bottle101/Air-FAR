@@ -38,7 +38,7 @@ TeleopPanel::TeleopPanel( QWidget* parent )
   connect( push_button_4_, SIGNAL( pressed() ), this, SLOT( pressButton4() ));
   connect( check_box_1_, SIGNAL( stateChanged(int) ), this, SLOT( clickBox1(int) ));
   connect( check_box_2_, SIGNAL( stateChanged(int) ), this, SLOT( clickBox2(int) ));
-  connect( drive_widget_, SIGNAL( outputVelocity( float, float, bool )), this, SLOT( setVel( float, float, bool )));
+  connect( drive_widget_, SIGNAL( outputVelocity( float, float, bool, float )), this, SLOT( setVel( float, float, bool, float )));
   connect( output_timer, SIGNAL( timeout() ), this, SLOT( sendVel() ));
 
   output_timer->start( 100 );
@@ -148,11 +148,12 @@ void TeleopPanel::clickBox2(int val)
   }
 }
 
-void TeleopPanel::setVel( float lin, float ang, bool pre )
+void TeleopPanel::setVel( float lin, float ang, bool pre, float z_vel )
 {
   linear_velocity_ = lin;
   angular_velocity_ = ang;
   mouse_pressed_ = pre;
+  z_velocity_ = z_vel;
 }
 
 void TeleopPanel::sendVel()
@@ -162,7 +163,7 @@ void TeleopPanel::sendVel()
     sensor_msgs::Joy joy;
 
     joy.axes.push_back( 0 );
-    joy.axes.push_back( 0 );
+    joy.axes.push_back( z_velocity_ );
     joy.axes.push_back( 1.0 );
     joy.axes.push_back( angular_velocity_ );
     joy.axes.push_back( linear_velocity_ );

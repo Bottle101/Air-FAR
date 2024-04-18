@@ -235,6 +235,7 @@ void ClearInsertNodes(const NodePtrStack& insert_nav_nodes);
 
 void UpdateConnectivityBetweenInsertNodes();
 
+void recheckPath(const NavNodePtr& odom_node_ptr, PointStack& global_path, NodePtrStack& global_path_ptr);
 
 };
 

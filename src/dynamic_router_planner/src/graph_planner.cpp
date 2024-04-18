@@ -136,10 +136,10 @@ void GraphPlanner::UpdateGoalNavNodeConnects(const NavNodePtr& goal_node_ptr)
 }
 
 bool GraphPlanner::IsValidConnectToOdom(const NavNodePtr& node_ptr, const NavNodePtr& odom_node_ptr) {
-    // cout<<"GP: Is valid connect to odom"<<endl;
-    // cout<<DynamicGraph::IsConnectInVerticalConstrain(node_ptr, odom_node_ptr)<<endl;
-    // cout<<ContourGraph::IsNavToOdomConnectFreePolygon(node_ptr, odom_node_ptr)<<endl;
-    // cout<<"============================"<<endl;
+    ROS_WARN("GP: Is valid connect to odom");
+    cout<<DynamicGraph::IsConnectInVerticalConstrain(node_ptr, odom_node_ptr)<<endl;
+    cout<<ContourGraph::IsNavToOdomConnectFreePolygon(node_ptr, odom_node_ptr)<<endl;
+    ROS_WARN("=================================");
     if (DynamicGraph::IsConnectInVerticalConstrain(node_ptr, odom_node_ptr) && 
         ContourGraph::IsNavToOdomConnectFreePolygon(node_ptr, odom_node_ptr))
     {
@@ -149,6 +149,10 @@ bool GraphPlanner::IsValidConnectToOdom(const NavNodePtr& node_ptr, const NavNod
 }
 
 bool GraphPlanner::IsValidConnectToGoal(const NavNodePtr& node_ptr, const NavNodePtr& goal_node_ptr) {
+    // ROS_ERROR("GP: Is valid connect to goal");
+    // cout<<DynamicGraph::IsConnectInVerticalConstrain(node_ptr, goal_node_ptr)<<endl;
+    // cout<<ContourGraph::IsNavToGoalConnectFreePolygon(node_ptr, goal_node_ptr)<<endl;
+    // ROS_ERROR("=================================");
     if (!node_ptr->is_block_to_goal || IsResetBlockStatus(node_ptr)) {
         if (DynamicGraph::IsConnectInVerticalConstrain(node_ptr, goal_node_ptr) && 
             ContourGraph::IsNavToGoalConnectFreePolygon(node_ptr, goal_node_ptr))
@@ -265,6 +269,8 @@ bool GraphPlanner::NextGoalPlanning(PointStack& global_path,
         }
     }
     if (this->ReconstructPath(goal_node_ptr_, is_free_nav_goal_, global_path, global_path_ptr)) {
+        // recheck path
+        // this->recheckPath(odom_node_ptr_, global_path, global_path_ptr);
         if (!is_divided_path) {
             NodePtrStack divided_path_;
             GetDividedPath(global_path_ptr, divided_path_);
@@ -318,6 +324,36 @@ bool GraphPlanner::ReconstructPath(const NavNodePtr& goal_node_ptr,
     std::reverse(global_path_ptr.begin(), global_path_ptr.end());
 
     return true;
+}
+
+void GraphPlanner::recheckPath(const NavNodePtr& odom_node_ptr, PointStack& global_path, NodePtrStack& global_path_ptr) {
+    if (global_path.size() < 2) {
+        ROS_ERROR("GP: global path size less than 2.");
+        return;
+    }
+
+    const std::size_t path_size = global_path.size();
+    std::size_t nav_idx = 1;
+
+    for (std::size_t i = 1; i < path_size; i++) {
+        if (this->IsValidConnectToOdom(global_path_ptr[i], odom_node_ptr)) {
+            DynamicGraph::AddEdge(global_path_ptr[i], odom_node_ptr);
+            nav_idx = i;
+        } else {
+            break;
+        }
+    }
+
+    if (nav_idx > 1 && nav_idx < path_size - 1) {
+        ROS_ERROR("GP: recheck path, remove nodes from %d to %d", 1, nav_idx - 1);
+        if (nav_idx == 2) {
+            global_path.erase(global_path.begin() + 1);
+            global_path_ptr.erase(global_path_ptr.begin() + 1);
+        } else {
+            global_path.erase(global_path.begin() + 1, global_path.begin() + nav_idx - 1);
+            global_path_ptr.erase(global_path_ptr.begin() + 1, global_path_ptr.begin() + nav_idx - 1);
+        }
+    }
 }
 
 Point3D GraphPlanner::NextNavWaypointFromPath(const PointStack& global_path) {

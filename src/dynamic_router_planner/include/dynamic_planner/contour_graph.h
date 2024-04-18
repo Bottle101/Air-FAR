@@ -94,6 +94,12 @@ public:
                                            const bool& is_global_check,
                                            const bool& layer_limited=true);
 
+    static bool IsPointsConnectFreePolygonTest(const ConnectPair& cedge,
+                                                const int& start_layer,
+                                                const int& end_layer,
+                                                const bool& is_global_check,
+                                                const bool& layer_limited);
+
     static bool IsTopLayerNodesConnectFreePolygon(const NavNodePtr& node_ptr1, const NavNodePtr& node_ptr2, const bool& layer_limited);
 
     static bool IsEdgeCollideSegment(const PointPair& line, const ConnectPair& edge);
@@ -145,7 +151,7 @@ private:
         return project_dir;
     }
 
-    static inline ConnectPair ReprojectEdge(const NavNodePtr& node_ptr1, const NavNodePtr& node_ptr2, const float& dist);
+    static inline ConnectPair ReprojectEdge(const NavNodePtr& node_ptr1, const NavNodePtr& node_ptr2, const float& dist, const bool& is_inv=false);
 
     static void UpdateOdomFreePosition(const NavNodePtr& odom_ptr, Point3D& global_free_p);
 

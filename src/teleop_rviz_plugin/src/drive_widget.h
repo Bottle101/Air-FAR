@@ -6,6 +6,8 @@
 
 #include <QPainter>
 #include <QMouseEvent>
+#include <QKeyEvent>
+#include <QWheelEvent>
 
 #include <QWidget>
 
@@ -20,12 +22,16 @@ public:
   virtual void paintEvent( QPaintEvent* event );
   virtual void mouseMoveEvent( QMouseEvent* event );
   virtual void mousePressEvent( QMouseEvent* event );
+  virtual void wheelEvent( QWheelEvent* event );
+
+  // virtual void KeyPressEvent( QKeyEvent* event );
+
   virtual void mouseReleaseEvent( QMouseEvent* event );
   virtual void leaveEvent( QEvent* event );
   virtual QSize sizeHint() const { return QSize( 150, 150 ); }
 
 Q_SIGNALS:
-  void outputVelocity( float linear, float angular, bool pressed );
+  void outputVelocity( float linear, float angular, bool pressed, float z_vel );
 
 protected:
   void sendVelocitiesFromMouse( int x, int y, int width, int height );

@@ -1,7 +1,10 @@
 #include "drive_widget.h"
+#include "ros/ros.h"
 
 namespace teleop_rviz_plugin
 {
+
+float z_velocity_ = 0.0;
 
 DriveWidget::DriveWidget( QWidget* parent )
   : QWidget( parent )
@@ -32,7 +35,7 @@ void DriveWidget::paintEvent( QPaintEvent* event )
 
   int w = width();
   int h = height();
-  int size = (( w > h ) ? h : w) - 1;
+  int size = (( w > h ) ? h : w) - 1 - 60;
   int hpad = ( w - size ) / 2;
   int vpad = ( h - size ) / 2;
 
@@ -44,6 +47,19 @@ void DriveWidget::paintEvent( QPaintEvent* event )
 
   painter.drawLine( hpad, height() / 2, hpad + size, height() / 2 );
   painter.drawLine( width() / 2, vpad, width() / 2, vpad + size );
+
+  // painter.setPen(QPen(Qt::darkGray, 3));
+  painter.drawLine( hpad + size + 20, vpad, hpad + size + 20, vpad + size );
+
+  if (isEnabled() && (angular_velocity_ != 0 || linear_velocity_ != 0)) {
+    painter.setPen(QPen(Qt::darkRed, 3));    
+    painter.drawEllipse( hpad + size + 10, (-z_velocity_ + 1.0)/2 * size + vpad - 10, 20, 20 );    
+  } else {
+    painter.setPen(QPen(Qt::gray, 1));
+    painter.drawEllipse( hpad + size + 10, (-z_velocity_ + 1.0)/2 * size + vpad - 10, 20, 20 );    
+    painter.setPen( crosshair );
+  }
+
 
   if( isEnabled() && (angular_velocity_ != 0 || linear_velocity_ != 0 ))
   {
@@ -62,6 +78,7 @@ void DriveWidget::paintEvent( QPaintEvent* event )
 
     painter.drawPolyline( joystick, 2 );
     painter.drawEllipse( x_mouse_ - 10, y_mouse_ - 10, 20, 20 );
+    // painter.drawEllipse( hpad + size + 10, (-z_velocity_ + 1.0)/2 * size + vpad - 10, 20, 20 );
   }
 }
 
@@ -74,6 +91,32 @@ void DriveWidget::mousePressEvent( QMouseEvent* event )
 {
   sendVelocitiesFromMouse( event->x(), event->y(), width(), height() );
 }
+
+// void DriveWidget::KeyPressEvent( QKeyEvent* event ) {
+//   if ( event->key() == Qt::Key_Up || event->key() == Qt::Key_W) {
+//     z_velocity_ = 1.0;
+//   } else if ( event->key() == Qt::Key_Down || event->key() == Qt::Key_S) {
+//     z_velocity_ = -1.0;
+//   } else {
+//     z_velocity_ = 0.0;
+//   }
+//   z_velocity_ = 1.0;
+//   ROS_WARN("z_velocity: %f", z_velocity_);
+//   // printf("z_velocity: %f\n", z_velocity_);
+// }
+
+void DriveWidget::wheelEvent( QWheelEvent* event ) {
+  if ( event->angleDelta().y() > 0) {
+    z_velocity_ = std::min(z_velocity_ + 0.5, 1.0);
+  } else if ( event->angleDelta().y() < 0) {
+    z_velocity_ = std::max(z_velocity_ - 0.5, -1.0);
+  }
+  // z_velocity_ = 1.0;
+  // ROS_WARN("z_velocity: %f", z_velocity_);
+  // printf("z_velocity: %f\n", z_velocity_);
+}
+
+
 
 void DriveWidget::leaveEvent( QEvent* event )
 {
@@ -107,8 +150,9 @@ void DriveWidget::sendVelocitiesFromMouse( int x, int y, int width, int height )
   else if ( angular_velocity_ > 1.0 ) angular_velocity_ = 1.0;
 
   mouse_pressed_ = true;
+  // printf("linear_velocity: %f, angular_velocity: %f\n", linear_velocity_, angular_velocity_);
 
-  Q_EMIT outputVelocity( linear_velocity_, angular_velocity_, mouse_pressed_ );
+  Q_EMIT outputVelocity( linear_velocity_, angular_velocity_, mouse_pressed_, z_velocity_ );
   update();
 }
 
@@ -118,7 +162,7 @@ void DriveWidget::stop()
   angular_velocity_ = 0;
   mouse_pressed_ = false;
 
-  Q_EMIT outputVelocity( linear_velocity_, angular_velocity_, mouse_pressed_ );
+  Q_EMIT outputVelocity( linear_velocity_, angular_velocity_, mouse_pressed_, z_velocity_ );
   update();
 }
 
