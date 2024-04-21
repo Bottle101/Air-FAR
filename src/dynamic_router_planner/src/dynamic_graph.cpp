@@ -229,7 +229,7 @@ void DynamicGraph::UpdateNavGraph(const NodePtrStack& new_nodes,
                 this->ConnectVerticalNodes(near_nav_nodes_[i], near_nav_nodes_[j]);
             }
             // ROS_WARN("2222222: %d", near_nav_nodes_.size());
-            bool ret = this->IsValidConnect(near_nav_nodes_[i], near_nav_nodes_[j], true, true, is_merge, is_matched, false);
+            // bool ret = this->IsValidConnect(near_nav_nodes_[i], near_nav_nodes_[j], true, true, is_merge, is_matched, false);
             // ROS_WARN("3333333: %d", near_nav_nodes_.size());
             if (this->IsValidConnect(near_nav_nodes_[i], near_nav_nodes_[j], true, true, is_merge, is_matched, false)) {
                     if (is_matched || near_nav_nodes_[i]->is_navpoint || near_nav_nodes_[j]->is_navpoint) {

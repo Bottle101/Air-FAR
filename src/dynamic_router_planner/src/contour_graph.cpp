@@ -206,11 +206,11 @@ bool ContourGraph::IsNavToOdomConnectFreePolygon(const NavNodePtr& node_ptr, con
 
     if (node_ptr->is_inserted) {
         // print cedge use roswarn
-        ROS_ERROR("start_p: %f, %f", cedge.start_p.x, cedge.start_p.y);
-        ROS_ERROR("end_p: %f, %f", cedge.end_p.x, cedge.end_p.y);
-        ROS_WARN("==============================");
-        ROS_WARN("start_p2: %f, %f", cedge2.start_p.x, cedge2.start_p.y);
-        ROS_WARN("end_p2: %f, %f", cedge2.end_p.x, cedge2.end_p.y);
+        // ROS_ERROR("start_p: %f, %f", cedge.start_p.x, cedge.start_p.y);
+        // ROS_ERROR("end_p: %f, %f", cedge.end_p.x, cedge.end_p.y);
+        // ROS_WARN("==============================");
+        // ROS_WARN("start_p2: %f, %f", cedge2.start_p.x, cedge2.start_p.y);
+        // ROS_WARN("end_p2: %f, %f", cedge2.end_p.x, cedge2.end_p.y);
         // print diff2d
         // ROS_WARN("diff2d: %f, %f", diff2d.x, diff2d.y);
         return ContourGraph::IsPointsConnectFreePolygon(cedge, start_layer, end_layer, is_global_check, false);
