@@ -36,6 +36,7 @@
 # include <ros/ros.h>
 
 # include "pose_tool.h"
+#include <sensor_msgs/Joy.h>
 #endif
 
 namespace rviz
@@ -60,7 +61,7 @@ private Q_SLOTS:
 
 private:
   ros::NodeHandle nh_;
-  ros::Publisher pub_goal_, pub_droneID_goal_;
+  ros::Publisher pub_goal_, pub_droneID_goal_, pub_, pub_joy_;
 
   StringProperty* topic_property_;
 };

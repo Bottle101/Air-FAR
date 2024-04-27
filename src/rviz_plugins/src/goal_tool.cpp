@@ -64,6 +64,8 @@ void Goal3DTool::updateTopic()
 {
   pub_goal_ = nh_.advertise<geometry_msgs::PoseStamped>(topic_property_->getStdString(), 1);
   pub_droneID_goal_ = nh_.advertise<quadrotor_msgs::GoalSet>("/goal_with_id", 1);
+  pub_ = nh_.advertise<geometry_msgs::PointStamped>("/goal_point", 5);
+  pub_joy_ = nh_.advertise<sensor_msgs::Joy>("/joy", 5);
 }
 
 void Goal3DTool::onPoseSet(double x, double y, double z, double theta)
@@ -86,6 +88,45 @@ void Goal3DTool::onPoseSet(double x, double y, double z, double theta)
   goal_with_id.goal[1] = y;
   goal_with_id.goal[2] = z;
   pub_droneID_goal_.publish(goal_with_id);
+
+  geometry_msgs::PointStamped route_goal;
+  route_goal.header.frame_id = "/map";
+  route_goal.header.stamp = ros::Time::now();
+  route_goal.point.x = x;
+  route_goal.point.y = y;
+  route_goal.point.z = z;
+
+  pub_.publish(route_goal);
+  usleep(10000);
+  pub_.publish(route_goal);
+
+  sensor_msgs::Joy joy;
+
+  joy.axes.push_back(0);
+  joy.axes.push_back(0);
+  joy.axes.push_back(-1.0);
+  joy.axes.push_back(0);
+  joy.axes.push_back(1.0);
+  joy.axes.push_back(1.0);
+  joy.axes.push_back(0);
+  joy.axes.push_back(0);
+
+  joy.buttons.push_back(0);
+  joy.buttons.push_back(0);
+  joy.buttons.push_back(0);
+  joy.buttons.push_back(0);
+  joy.buttons.push_back(0);
+  joy.buttons.push_back(0);
+  joy.buttons.push_back(0);
+  joy.buttons.push_back(1);
+  joy.buttons.push_back(0);
+  joy.buttons.push_back(0);
+  joy.buttons.push_back(0);
+
+  joy.header.stamp = ros::Time::now();
+  joy.header.frame_id = "navpoint_tool";
+  pub_joy_.publish(joy);
+
 }
 
 } // end namespace rviz
