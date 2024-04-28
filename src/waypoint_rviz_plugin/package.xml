@@ -1,13 +1,13 @@
 <package>
-  <name> rviz_plugins </name>
+  <name> navpoint_rviz_plugin </name>
   <description>
 
-    Additional plugins for rviz
+    A tool for sending free space navigation waypoint to Aerial Dev Env
 
   </description>
   <version>0.1.0</version>
-  <maintainer email="eeshaojie@ust.hk">Shaojie Shen</maintainer>
-  <maintainer email="wwuar@connect.ust.hk">william.wu</maintainer>
+  <maintainer email="zhangji@cmu.edu">Ji Zhang</maintainer>
+  <maintainer email="botao@umd.edu">Botao He</maintainer>
   <license>LGPLv3</license>
   <url>http://ros.org/wiki/rviz_plugins</url>
 

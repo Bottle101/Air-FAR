@@ -593,8 +593,8 @@ void DPMaster::ExtractDynamicObsFromScan(const PointCloudPtr& scanCloudIn,
   scan_handler_.ExtractDyObsCloud(obsCloudIn, dyObsCloudOut);
 }
 
-void DPMaster::WaypointCallBack(const geometry_msgs::PoseStampedConstPtr & msg) {
-  Point3D goal_p(msg->pose.position.x, msg->pose.position.y, msg->pose.position.z);
+void DPMaster::WaypointCallBack(const geometry_msgs::PointStampedConstPtr & msg) {
+  Point3D goal_p(msg->point.x, msg->point.y, msg->point.z);
   const std::string goal_frame = msg->header.frame_id;
   if (!DPUtil::IsSameFrameID(goal_frame, master_params_.world_frame)) {
     ROS_WARN("DPMaster: waypoint published is not on world frame!");

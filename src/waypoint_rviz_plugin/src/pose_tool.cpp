@@ -78,12 +78,19 @@ Pose3DTool::deactivate()
 int
 Pose3DTool::processMouseEvent(ViewportMouseEvent& event)
 {
+  if (state_ == Orientation && event.wheel_delta) {
+    state_ = Height;
+      // ROS_WARN("Height: %d", event.left());
+  }
+  
+  // ROS_WARN("Height: %d", event.x);
+
   int                  flags = 0;
   static Ogre::Vector3 ang_pos;
   static double        initz;
   static double        prevz;
   static double        prevangle;
-  const double         z_scale    = 50;
+  const double         z_scale    = 240;
   const double         z_interval = 0.5;
   Ogre::Quaternion     orient_x =
     Ogre::Quaternion(Ogre::Radian(Ogre::Math::HALF_PI), Ogre::Vector3::UNIT_Z);
@@ -102,7 +109,7 @@ Pose3DTool::processMouseEvent(ViewportMouseEvent& event)
       flags |= Render;
     }
   }
-  else if (event.type == QEvent::MouseMove && event.left())
+  else if (event.left())
   {
     if (state_ == Orientation)
     {
@@ -115,20 +122,17 @@ Pose3DTool::processMouseEvent(ViewportMouseEvent& event)
         double angle = atan2(cur_pos.y - pos_.y, cur_pos.x - pos_.x);
         arrow_->getSceneNode()->setVisible(true);
         arrow_->setOrientation(Ogre::Quaternion(orient_x));
-        if (event.right())
-          state_  = Height;
-        initz     = pos_.z;
-        prevz     = event.y;
+        // ROS_WARN("Height: %d", event.wheel_delta);
+        // if (event.wheel_delta != 0) {
+        //   state_  = Height;          
+        // }
         prevangle = angle;
         flags |= Render;
       }
     }
     if (state_ == Height)
     {
-      double z  = event.y;
-      double dz = z - prevz;
-      prevz     = z;
-      pos_.z -= dz / z_scale;
+      pos_.z += event.wheel_delta/z_scale;
       arrow_->setPosition(pos_);
       // Create a list of arrows
       for (int k = 0; k < arrow_array.size(); k++)

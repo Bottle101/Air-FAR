@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2008, Willow Garage, Inc.
+ * Copyright (c) 2012, Willow Garage, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,51 +27,46 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef RVIZ_POSE_TOOL_H
-#define RVIZ_POSE_TOOL_H
+#ifndef RVIZ_GOAL_TOOL_H
+#define RVIZ_GOAL_TOOL_H
 
-#include <OGRE/OgreVector3.h>
+#ifndef Q_MOC_RUN  // See: https://bugreports.qt-project.org/browse/QTBUG-22829
+# include <QObject>
 
-#include <QCursor>
+# include <ros/ros.h>
 
-#include <ros/ros.h>
-
-#include "rviz/tool.h"
+# include "pose_tool.h"
+#endif
 
 namespace rviz
 {
 class Arrow;
 class DisplayContext;
+class StringProperty;
 
-class Pose3DTool : public Tool
+class Goal3DTool: public Pose3DTool
 {
+Q_OBJECT
 public:
-  Pose3DTool();
-  virtual ~Pose3DTool();
-
+  Goal3DTool();
+  virtual ~Goal3DTool() {}
   virtual void onInitialize();
 
-  virtual void activate();
-  virtual void deactivate();
-
-  virtual int processMouseEvent(ViewportMouseEvent& event);
-
 protected:
-  virtual void onPoseSet(double x, double y, double z, double theta) = 0;
+  virtual void onPoseSet(double x, double y, double z, double theta);
 
-  Arrow*              arrow_;
-  std::vector<Arrow*> arrow_array;
+private Q_SLOTS:
+  void updateTopic();
 
-  enum State
-  {
-    Position,
-    Orientation,
-    Height
-  };
-  State state_;
+private:
+  ros::NodeHandle nh_;
+  ros::Publisher pub_goal_, pub_droneID_goal_, wp_pub_, pub_joy_;
 
-  Ogre::Vector3 pos_;
+  StringProperty* topic_property_;
 };
+
 }
 
 #endif
+
+

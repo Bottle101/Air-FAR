@@ -15,13 +15,11 @@ Panels:
         - /Marker1/Namespaces1
         - /Grid1
       Splitter Ratio: 0.5941176414489746
-    Tree Height: 880
+    Tree Height: 441
   - Class: rviz/Selection
     Name: Selection
   - Class: rviz/Tool Properties
     Expanded:
-      - /Goalpoint1
-      - /Navpoint1
       - /3D Nav Goal1
     Name: Tool Properties
     Splitter Ratio: 0.5886790156364441
@@ -33,7 +31,7 @@ Panels:
   - Class: rviz/Time
     Name: Time
     SyncMode: 0
-    SyncSource: RegScan
+    SyncSource: ""
   - Class: rviz/ControlPanel
     Name: ControlPanel
 Preferences:
@@ -401,20 +399,7 @@ Visualization Manager:
       Marker Topic: /viz_graph_topic
       Name: GlobalGraph
       Namespaces:
-        bottom_contour: true
-        contour_align: false
-        contour_edge: true
-        corner_surf: false
-        covered_nodes: true
-        graph_edge: false
-        graph_node: true
-        insert_node: true
-        internav_node: true
-        near_node: true
-        odom_edge: true
-        surf_direct: false
-        top_contour: true
-        unfinal_node: true
+        {}
       Queue Size: 1
       Value: true
     - Alpha: 1
@@ -730,8 +715,7 @@ Visualization Manager:
       Marker Topic: /viz_node_topic
       Name: Marker
       Namespaces:
-        last_nav_node: true
-        new_nodes: true
+        {}
       Queue Size: 100
       Value: true
     - Alpha: 1
@@ -770,10 +754,6 @@ Visualization Manager:
   Name: root
   Tools:
     - Class: rviz/MoveCamera
-    - Class: rviz/GoalPointTool
-      Topic: goalpoint
-    - Class: rviz/NavpointTool
-      Topic: navpoint
     - Class: rviz_plugins/Goal3DTool
       Topic: goal
   Value: true

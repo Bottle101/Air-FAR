@@ -1201,7 +1201,7 @@ Visualization Manager:
   Name: root
   Tools:
     - Class: rviz/MoveCamera
-    - Class: rviz_plugins/Goal3DTool
+    - Class: rviz_plugins/NavpointTool
       Topic: goal
     - Class: rviz/SetInitialPose
       Topic: trigger
