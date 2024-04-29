@@ -8,6 +8,9 @@
 #include <QMouseEvent>
 #include <QKeyEvent>
 #include <QWheelEvent>
+#include <QSlider>
+#include <QVBoxLayout>
+#include <QResizeEvent>
 
 #include <QWidget>
 
@@ -22,7 +25,8 @@ public:
   virtual void paintEvent( QPaintEvent* event );
   virtual void mouseMoveEvent( QMouseEvent* event );
   virtual void mousePressEvent( QMouseEvent* event );
-  virtual void wheelEvent( QWheelEvent* event );
+  // virtual void wheelEvent( QWheelEvent* event );
+  // virtual void resizeEvent(QResizeEvent* event);
 
   // virtual void KeyPressEvent( QKeyEvent* event );
 
@@ -36,6 +40,8 @@ Q_SIGNALS:
 protected:
   void sendVelocitiesFromMouse( int x, int y, int width, int height );
   void stop();
+  void setZVelocity(int value); // Handler for slider changes
+  void resizeEvent(QResizeEvent* event) override;
 
   float linear_velocity_;
   float angular_velocity_;
@@ -43,6 +49,7 @@ protected:
   float angular_scale_;
   float x_mouse_, y_mouse_;
   bool mouse_pressed_;
+  QSlider *zVelocitySlider; // Slider for adjusting z_velocity_
 };
 
 }
