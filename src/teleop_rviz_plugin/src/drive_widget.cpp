@@ -98,12 +98,25 @@ void DriveWidget::paintEvent( QPaintEvent* event )
     QPointF joystick[ 2 ];
     joystick[ 0 ].setX( hpad + size / 2 );
     joystick[ 0 ].setY( vpad + size / 2 );
-    joystick[ 1 ].setX( x_mouse_ );
-    joystick[ 1 ].setY( y_mouse_ );
+    
+    float x, y;
+    if (x_mouse_ > hpad + size / 2) {
+      x = std::min( hpad + size, int(x_mouse_) );
+      joystick[ 1 ].setX( x );
+    } else {
+      x = std::max( hpad, int(x_mouse_) );
+      joystick[ 1 ].setX( x );
+    }
+    if (y_mouse_ > vpad + size / 2) {
+      y = std::min( vpad + size, int(y_mouse_) );
+      joystick[ 1 ].setY( y );
+    } else {
+      y = std::max( vpad, int(y_mouse_) );
+      joystick[ 1 ].setY( y );
+    }
 
     painter.drawPolyline( joystick, 2 );
-    painter.drawEllipse( x_mouse_ - 10, y_mouse_ - 10, 20, 20 );
-    // painter.drawEllipse( hpad + size + 10, (-z_velocity_ + 1.0)/2 * size + vpad - 10, 20, 20 );
+    painter.drawEllipse( x - 10, y - 10, 20, 20 );
   }
 
 }

@@ -29,6 +29,8 @@ void DPUtil::RemoveNanInfPoints(const PointCloudPtr& cloudInOut) {
       ROS_WARN_ONCE("DPUtil: nan or inf point detected.");
       continue;
     }
+    // if (!is_graph_init_ && p.z < 0.2) continue;
+    if (p.z < 0.2) continue;
     temp_cloud.points[idx] = p;
     idx ++;
   }
