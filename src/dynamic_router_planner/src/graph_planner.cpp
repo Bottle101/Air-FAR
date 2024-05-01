@@ -116,6 +116,7 @@ void GraphPlanner::UpdateGoalNavNodeConnects(const NavNodePtr& goal_node_ptr)
     this->ReEvaluateGoalStatus(goal_node_ptr_, global_graph_);
     for (const auto& node_ptr : global_graph_) {
         if (node_ptr == goal_node_ptr_) continue;
+        ROS_WARN("GP: Update goal node connect status: %d", this->IsValidConnectToGoal(node_ptr, goal_node_ptr_));
         if (this->IsValidConnectToGoal(node_ptr, goal_node_ptr_)) {
             const bool is_directly_connect = node_ptr->is_odom ? true : false;
             DynamicGraph::RecordPolygonEdge(node_ptr, goal_node_ptr_, gp_params_.votes_size, is_directly_connect);

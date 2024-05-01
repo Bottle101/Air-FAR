@@ -209,7 +209,6 @@ void DynamicGraph::UpdateNavGraph(const NodePtrStack& new_nodes,
     // reconnect between near nodes
     for (std::size_t i=0; i<near_nav_nodes_.size(); i++) {
         if (near_nav_nodes_[i]->is_merged || near_nav_nodes_[i]->is_odom) continue;
-        // if (near_nav_nodes_[i]->is_wall_insert) near_nav_nodes_[i]->is_finalized = true;
 
         // re-evaluate nodes which are not in near
         const NodePtrStack copy_connect_nodes = near_nav_nodes_[i]->connect_nodes;
@@ -276,7 +275,7 @@ void DynamicGraph::UpdateNavGraph(const NodePtrStack& new_nodes,
             near_nav_nodes_[i]->is_top_layer = false;
             // for (auto cnode : near_nav_nodes_[i]->contour_connects) {
             //     if (cnode->is_wall_insert) {
-            //         cnode->is_top_layer = false;
+            //         // cnode->is_top_layer = false;
             //         for (auto cnode2 : cnode->connect_nodes) {
             //             EraseEdge(cnode, cnode2);
             //         }
@@ -285,7 +284,8 @@ void DynamicGraph::UpdateNavGraph(const NodePtrStack& new_nodes,
         }
 
         // remove connections of non-top layer inserted wall nodes
-        if (near_nav_nodes_[i]->is_wall_insert && near_nav_nodes_[i]->is_top_layer == false) {
+        // if (near_nav_nodes_[i]->is_wall_insert && near_nav_nodes_[i]->is_top_layer == false) {
+        if (near_nav_nodes_[i]->is_wall_insert) {
             for (auto cnode : near_nav_nodes_[i]->connect_nodes) {
                 DPUtil::EraseNodeFromStack(near_nav_nodes_[i], cnode->connect_nodes);
             }
@@ -315,17 +315,13 @@ void DynamicGraph::UpdateNavGraph(const NodePtrStack& new_nodes,
     DPUtil::Timer.start_time("Adding edges between existing nodes with new extracted nodes");
     // Adding edges between existing nodes with new extracted nodes
     for (const auto& new_node_ptr : new_nodes) {
-
-        // if (new_node_ptr->is_wall_insert) cout<<"DG: New wall insert: " << !this->IsConnectedNewNode(new_node_ptr) <<endl;
-
-        if (!this->IsConnectedNewNode(new_node_ptr)) continue;
+        if (!this->IsConnectedNewNode(new_node_ptr) || new_node_ptr->is_wall_insert) continue;
         for (const auto& neighbor_node_ptr : near_nav_nodes_) {
-            if (neighbor_node_ptr->is_odom || neighbor_node_ptr->is_merged) continue;
+            if (neighbor_node_ptr->is_odom || neighbor_node_ptr->is_merged || neighbor_node_ptr->is_wall_insert) continue;
             if (this->IsValidConnect(neighbor_node_ptr, new_node_ptr, true)) {
                 this->AddEdge(neighbor_node_ptr, new_node_ptr);
             }
         }
-        // if (new_node_ptr->is_wall_insert) cout<<"DG: New wall inserted "<<endl;
         this->AddNodeToGraph(new_node_ptr);
         if (new_node_ptr->is_navpoint) {
             this->UpdateCurInterNavNode(new_node_ptr);
