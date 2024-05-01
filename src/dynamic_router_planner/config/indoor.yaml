@@ -1,11 +1,11 @@
 # Dynamic Planner Default Params
-main_run_freq                           : 2.5
+main_run_freq                           : 5.0
 voxel_dim                               : 0.2   # Unit: meter
 robot_dim                               : 0.8   # Unit: meter
 vehicle_height                          : 0.8   # Unit: meter
 sensor_range                            : 30.0  # Unit: meter
 reproject_dist                          : 5.0   # Unit: meter
-layer_resoltion                         : 1.0
+layer_resoltion                         : 0.75
 neighbor_layer_num                      : 1
 visualize_ratio                         : 0.75
 is_inter_navpoint                       : true
