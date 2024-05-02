@@ -743,17 +743,17 @@ void ContourGraph::SearchKNN(const CTNodePtr& node, std::vector<int>& indices, c
 }
 
 void ContourGraph::ConnectVerticalEdges(const int& layer_id) {
-    // ROS_WARN("ConnectVerticalEdges size: %d", multi_contour_graph_[layer_id+1].empty());
+    ROS_WARN("ConnectVerticalEdges size: %d", multi_contour_graph_[layer_id+1].empty());
     
     for (const auto& node_ptr : multi_contour_graph_[layer_id]) {
-        // if (node_ptr->free_direct != NodeFreeDirect::CONVEX) continue;
-        // ROS_WARN("before KNN");
+        ROS_WARN("before KNN");
         std::vector<int> indices;
         SearchKNN(node_ptr, indices, layer_id+1);
-        // ROS_WARN("indices size: %d", indices.empty());
+        ROS_WARN("indices size: %d", indices.empty());
 
         for (const auto& index : indices) {
             const auto& neighbor_ptr = multi_contour_graph_[layer_id+1][index];
+            if (neighbor_ptr == NULL) continue;
             if (node_ptr->free_direct == NodeFreeDirect::PILLAR || neighbor_ptr->free_direct == NodeFreeDirect::PILLAR) continue;
             if (node_ptr->free_direct == neighbor_ptr->free_direct && (node_ptr->position - neighbor_ptr->position).norm() < 2.0) {
                 Point3D topo_dir = node_ptr->surf_dirs.first + node_ptr->surf_dirs.second;

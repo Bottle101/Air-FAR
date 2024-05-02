@@ -35,6 +35,8 @@
 
 # include <ros/ros.h>
 
+#include <nav_msgs/Odometry.h>
+
 # include "pose_tool.h"
 #endif
 
@@ -52,6 +54,9 @@ public:
   virtual ~Goal3DTool() {}
   virtual void onInitialize();
 
+  void OdomCallBack(const nav_msgs::OdometryConstPtr& msg);
+  double init_z = 0.0;
+
 protected:
   virtual void onPoseSet(double x, double y, double z, double theta);
 
@@ -61,6 +66,7 @@ private Q_SLOTS:
 private:
   ros::NodeHandle nh_;
   ros::Publisher pub_goal_, pub_droneID_goal_, wp_pub_, pub_joy_;
+  ros::Subscriber sub_odom_;
 
   StringProperty* topic_property_;
 };

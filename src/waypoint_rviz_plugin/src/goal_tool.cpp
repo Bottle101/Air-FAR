@@ -52,6 +52,10 @@ Goal3DTool::Goal3DTool()
   //                                              getPropertyContainer(), SLOT(updateTopic()), this);
 }
 
+void Goal3DTool::OdomCallBack(const nav_msgs::OdometryConstPtr& msg) {
+  init_z = msg->pose.pose.position.z;
+}
+
 void Goal3DTool::onInitialize()
 {
   Pose3DTool::onInitialize();
@@ -63,6 +67,7 @@ void Goal3DTool::updateTopic()
 {
   wp_pub_ = nh_.advertise<geometry_msgs::PointStamped>("/goal", 5);
   pub_joy_ = nh_.advertise<sensor_msgs::Joy>("/joy", 5);
+  sub_odom_ = nh_.subscribe("/state_estimation", 5, &Goal3DTool::OdomCallBack, this);
 }
 
 void Goal3DTool::onPoseSet(double x, double y, double z, double theta)
@@ -101,7 +106,7 @@ void Goal3DTool::onPoseSet(double x, double y, double z, double theta)
   waypoint.header.stamp = joy.header.stamp;
   waypoint.point.x = x;
   waypoint.point.y = y;
-  waypoint.point.z = z;
+  waypoint.point.z = z + init_z;
 
   wp_pub_.publish(waypoint);
   usleep(10000);
