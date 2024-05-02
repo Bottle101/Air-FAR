@@ -4,7 +4,7 @@
     <arg name="terrain_local_topic" default="/terrain_map"/>
     <arg name="scan_cloud_topic" default="/registered_scan"/>
     <arg name="rviz_file" default="dynamic_planner"/>
-    <arg name="config_file" default="indoor"/>
+    <arg name="config_file" default="indoor"/> <!-- indoor or outdoor -->
     <node pkg="dynamic_planner" type="dynamic_planner" name="dynamic_planner" output="screen">
         <rosparam command="load" file="$(find dynamic_planner)/config/$(arg config_file).yaml" />
         <remap from="/odom_world" to="$(arg odom_topic)"/> 

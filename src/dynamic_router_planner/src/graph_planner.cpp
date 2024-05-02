@@ -185,7 +185,10 @@ bool GraphPlanner::NextGoalPlanning(PointStack& global_path,
     global_path.clear();
     global_path_ptr.clear();
     
-    _goal_p = goal_node_ptr_->position;
+    // _goal_p = goal_node_ptr_->position;
+    _goal_p = origin_goal_pos_;
+    // ROS_WARN("original goal position: %f, %f, %f", _goal_p.x, _goal_p.y, _goal_p.z);
+    // ROS_WARN("goal position: %f, %f, %f", goal_node_ptr_->position.x, goal_node_ptr_->position.y, goal_node_ptr_->position.z);
     if (current_graph_.size() == 1) {
         const Point3D diff_p = (_goal_p - odom_node_ptr_->position).normalize();
         const Point3D next_goal = odom_node_ptr_->position + diff_p * 5.0;
@@ -395,6 +398,8 @@ void GraphPlanner::UpdateGoal(const Point3D& goal, const int& layer_id, const bo
     if (!is_use_internav_goal_) {
         DynamicGraph::CreateNavNodeFromPoint(goal, layer_id, goal_node_ptr_, false, false, true);
         DynamicGraph::AddNodeToGraph(goal_node_ptr_);
+
+    // ROS_WARN("22222goal position: %f, %f, %f", goal_node_ptr_->position.x, goal_node_ptr_->position.y, goal_node_ptr_->position.z);
     }
     ROS_INFO("GP: *********** new goal updated ***********");
     is_goal_init_ = true;
@@ -449,12 +454,12 @@ void GraphPlanner::ReEvaluateGoalStatus(const NavNodePtr& goal_ptr, const NodePt
             min_layer_id = adjust_layer_id;
         }
     }
-    if (min_layer_id != goal_ptr->layer_id) {
-        goal_ptr->layer_id = min_layer_id;
-        goal_ptr->position.z = DPUtil::layerIdx2Height_[min_layer_id];
-        ROS_WARN("GP: goal layer adjusted to %d, with absolute height: %f", min_layer_id, goal_ptr->position.z);
-        is_position_change = true;
-    }
+    // if (min_layer_id != goal_ptr->layer_id) {
+    //     goal_ptr->layer_id = min_layer_id;
+    //     goal_ptr->position.z = DPUtil::layerIdx2Height_[min_layer_id];
+    //     ROS_WARN("GP: goal layer adjusted to %d, with absolute height: %f", min_layer_id, goal_ptr->position.z);
+    //     is_position_change = true;
+    // }
     if (is_position_change) {
         for (const auto& node_ptr : graphIn) {
             node_ptr->is_block_to_goal = false;

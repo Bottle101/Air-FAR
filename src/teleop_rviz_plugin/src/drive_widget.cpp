@@ -1,5 +1,6 @@
 #include "drive_widget.h"
 #include "ros/ros.h"
+#include <algorithm>
 
 namespace teleop_rviz_plugin
 {
@@ -70,8 +71,11 @@ void DriveWidget::paintEvent( QPaintEvent* event )
 
   painter.drawRect( QRect( hpad , vpad, size, size ));
 
-  painter.drawLine( hpad, height() / 2, hpad + size, height() / 2 );
+  // painter.drawLine( hpad, height() / 2, hpad + size, height() / 2 );
   painter.drawLine( hpad + size / 2, vpad, hpad + size / 2, vpad + size );
+  painter.drawLine( hpad, vpad + (size / 2)*1.588, hpad + size, vpad + (size / 2)*(1.0-0.588));
+  painter.drawLine( hpad, vpad + (size / 2)*(1.0-0.588), hpad + size, vpad + (size / 2)*1.588);
+  // painter.drawLine( hpad + size / 2, vpad + size / 2, hpad + size, vpad);
 
   // painter.setPen(QPen(Qt::darkGray, 3));
   // painter.drawLine( hpad + size + 20, vpad, hpad + size + 20, vpad + size );
@@ -98,7 +102,7 @@ void DriveWidget::paintEvent( QPaintEvent* event )
     QPointF joystick[ 2 ];
     joystick[ 0 ].setX( hpad + size / 2 );
     joystick[ 0 ].setY( vpad + size / 2 );
-    
+
     float x, y;
     if (x_mouse_ > hpad + size / 2) {
       x = std::min( hpad + size, int(x_mouse_) );
@@ -177,6 +181,7 @@ void DriveWidget::sendVelocitiesFromMouse( int x, int y, int width, int height )
   if ( linear_velocity_ < -1.0 ) linear_velocity_ = -1.0;
   else if ( linear_velocity_ > 1.0 ) linear_velocity_ = 1.0;
   if ( fabs( linear_velocity_ ) < 0.1 ) linear_velocity_ = 0;
+
   angular_velocity_ = ( 1.0 - float( x - hpad ) / float( size / 2 )) * angular_scale_;
   if ( angular_velocity_ < -1.0 ) angular_velocity_ = -1.0;
   else if ( angular_velocity_ > 1.0 ) angular_velocity_ = 1.0;

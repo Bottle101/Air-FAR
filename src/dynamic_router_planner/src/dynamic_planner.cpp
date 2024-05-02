@@ -606,6 +606,7 @@ void DPMaster::WaypointCallBack(const geometry_msgs::PointStampedConstPtr & msg)
     graph_planner_.UpdateGoal(goal_p, layer_id, false);
     is_goal_update_  = true;
     // visualize original goal
+    // planner_viz_.VizPoint3D(goal_node_ptr_->position, "goal_node", VizColor::BLUE, 2.5);
     planner_viz_.VizPoint3D(goal_p, "original_goal", VizColor::RED, 1.5);
   } else {
     ROS_WARN("DPMaster: goal layer id assign failed.");

@@ -18,7 +18,7 @@ world_frame                             : map
 GraphMsger/robot_id                     : 0
 
 # Map Handler Params
-MapHandler/ceil_length                  : 30.0    # Unit: meter
+MapHandler/ceil_length                  : 100.0    # Unit: meter
 MapHandler/map_grid_max_length          : 2000.0 # Unit: meter
 MapHandler/map_grad_max_height          : 100.0  # Unit: meter 
 
@@ -61,8 +61,8 @@ CDetector/img_folder_path               : /home/bottle/hbt_ws/AirFar_dev/data/co
 
 # Graph Planner Params
 GPlanner/converge_distance              : 1.5
-GPlanner/goal_adjust_radius             : 5.0
-GPlanner/goal_z_tolerance               : 2.0
+GPlanner/goal_adjust_radius             : 1.0
+GPlanner/goal_z_tolerance               : 3.0
 GPlanner/free_counter_thred             : 7
 GPlanner/free_box_dim                   : 0.85 # Unit: meter
 GPlanner/reach_goal_vote_size           : 3

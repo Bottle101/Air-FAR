@@ -188,7 +188,7 @@ void DynamicGraph::UpdateNavGraph(const NodePtrStack& new_nodes,
     NodePtrStack codom_check_list = wide_near_nodes_;
     codom_check_list.insert(codom_check_list.end(), new_nodes.begin(), new_nodes.end());
     for (const auto& conode_ptr : codom_check_list) {
-        if (conode_ptr->is_odom || conode_ptr->is_merged) continue;
+        if (conode_ptr->is_odom || conode_ptr->is_merged || conode_ptr->is_wall_insert) continue;
         // if (conode_ptr->free_direct == NodeFreeDirect::INSERT) ROS_ERROR("DG: Free direct: %d", conode_ptr->free_direct);
         if (DynamicGraph::IsConnectInVerticalConstrain(odom_node_ptr_, conode_ptr)
         && ContourGraph::IsNavToOdomConnectFreePolygon(conode_ptr, odom_node_ptr_)
@@ -204,7 +204,7 @@ void DynamicGraph::UpdateNavGraph(const NodePtrStack& new_nodes,
         }
     }
 
-    DPUtil::Timer.start_time("reconnect between near nodes");
+    // DPUtil::Timer.start_time("reconnect between near nodes");
 
     // reconnect between near nodes
     for (std::size_t i=0; i<near_nav_nodes_.size(); i++) {
@@ -310,9 +310,9 @@ void DynamicGraph::UpdateNavGraph(const NodePtrStack& new_nodes,
         if (near_nav_nodes_[i]->down_node != NULL) this->EraseEdge(near_nav_nodes_[i], near_nav_nodes_[i]->down_node);
     }
     // DPUtil::Timer.end_time("reconnect between Vertical nodes");
-    DPUtil::Timer.end_time("reconnect between near nodes");
+    // DPUtil::Timer.end_time("reconnect between near nodes");
 
-    DPUtil::Timer.start_time("Adding edges between existing nodes with new extracted nodes");
+    // DPUtil::Timer.start_time("Adding edges between existing nodes with new extracted nodes");
     // Adding edges between existing nodes with new extracted nodes
     for (const auto& new_node_ptr : new_nodes) {
         if (!this->IsConnectedNewNode(new_node_ptr) || new_node_ptr->is_wall_insert) continue;
@@ -327,7 +327,7 @@ void DynamicGraph::UpdateNavGraph(const NodePtrStack& new_nodes,
             this->UpdateCurInterNavNode(new_node_ptr);
         }
     }
-    DPUtil::Timer.end_time("Adding edges between existing nodes with new extracted nodes");
+    // DPUtil::Timer.end_time("Adding edges between existing nodes with new extracted nodes");
     this->ClearMergedNodesInGraph();
     // Analysisig frontier nodes
     for (const auto& cnode_ptr : near_nav_nodes_) {
