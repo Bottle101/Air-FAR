@@ -5,7 +5,7 @@ robot_dim                               : 2.4   # Unit: meter
 vehicle_height                          : 1.6   # Unit: meter
 sensor_range                            : 30.0  # Unit: meter
 reproject_dist                          : 5.0   # Unit: meter
-layer_resoltion                         : 1.5
+layer_resoltion                         : 1.0
 neighbor_layer_num                      : 1
 visualize_ratio                         : 0.75
 is_inter_navpoint                       : true

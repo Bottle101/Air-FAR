@@ -743,12 +743,14 @@ void ContourGraph::SearchKNN(const CTNodePtr& node, std::vector<int>& indices, c
 }
 
 void ContourGraph::ConnectVerticalEdges(const int& layer_id) {
-    // ROS_WARN("ConnectVerticalEdges");
+    // ROS_WARN("ConnectVerticalEdges size: %d", multi_contour_graph_[layer_id+1].empty());
+    
     for (const auto& node_ptr : multi_contour_graph_[layer_id]) {
         // if (node_ptr->free_direct != NodeFreeDirect::CONVEX) continue;
+        // ROS_WARN("before KNN");
         std::vector<int> indices;
         SearchKNN(node_ptr, indices, layer_id+1);
-        // ROS_WARN("indices size: %d", indices.size());
+        // ROS_WARN("indices size: %d", indices.empty());
 
         for (const auto& index : indices) {
             const auto& neighbor_ptr = multi_contour_graph_[layer_id+1][index];
@@ -775,7 +777,7 @@ void ContourGraph::ConnectVerticalEdges(const int& layer_id) {
             }
         }
     }
-    // ROS_WARN("ConnectVerticalEdges-Finished");
+    ROS_WARN("ConnectVerticalEdges-Finished");
 }
 
 void ContourGraph::SetWallCornerNodes(const CTNodePtr& node_ptr1, const CTNodePtr& node_ptr2, const int& layer_idx) {
