@@ -6,8 +6,8 @@
 
 
 
-#include "dynamic_planner/contour_graph.h"
-#include "dynamic_planner/intersection.h"
+#include "airfar_planner/contour_graph.h"
+#include "airfar_planner/intersection.h"
 
 /***************************************************************************************/
 

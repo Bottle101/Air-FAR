@@ -1,5 +1,5 @@
-#ifndef DYNAMIC_PLANNER_H
-#define DYNAMIC_PLANNER_H
+#ifndef airfar_planner_H
+#define airfar_planner_H
 
 #include "utility.h"
 #include "dynamic_graph.h"

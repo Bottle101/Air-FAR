@@ -4,7 +4,7 @@
  * fanyang2@andrew.cmu.edu,   
  */
 
-#include "dynamic_planner/contour_detector.h"
+#include "airfar_planner/contour_detector.h"
 
 // const static int BLUR_SIZE = 10;
 

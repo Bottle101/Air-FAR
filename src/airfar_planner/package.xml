@@ -1,5 +1,5 @@
 <package>
-  <name>dynamic_planner</name>
+  <name>airfar_planner</name>
   <version>0.0.1</version>
   <description>Dynamic Route Planner</description>
   <maintainer email="fanyang2@alumni.cmu.edu">Fan Yang</maintainer>

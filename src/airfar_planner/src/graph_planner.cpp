@@ -6,7 +6,7 @@
 
 
 
-#include "dynamic_planner/graph_planner.h"
+#include "airfar_planner/graph_planner.h"
 // #include "graph_planner.h"
 // #include "graph_planner.h"
 
@@ -278,11 +278,11 @@ bool GraphPlanner::NextGoalPlanning(PointStack& global_path,
         if (!is_divided_path) {
             NodePtrStack divided_path_;
             GetDividedPath(global_path_ptr, divided_path_);
-            cout << "GP: global path size: " << global_path_ptr.size() << endl;
-            cout << "GP: divided path size: " << divided_path_.size() << endl;  
+            // cout << "GP: global path size: " << global_path_ptr.size() << endl;
+            // cout << "GP: divided path size: " << divided_path_.size() << endl;  
             is_divided_path = true;          
         } else {
-            ROS_WARN("GP: global path is already divided, global path size: %d", global_path_ptr.size());
+            // ROS_WARN("GP: global path is already divided, global path size: %d", global_path_ptr.size());
         }
         _nav_goal = this->NextNavWaypointFromPath(global_path);
         this->RecordPathInfo(global_path);

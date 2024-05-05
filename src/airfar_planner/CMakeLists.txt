@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(dynamic_planner)
+project(airfar_planner)
 
 set(CMAKE_CXX_STANDARD 14)
 
@@ -69,13 +69,13 @@ set(SOURCES ${SOURCES}
 )
 
 ## Declare executables
-add_executable(dynamic_planner src/dynamic_planner.cpp ${SOURCES})
+add_executable(airfar_planner src/airfar_planner.cpp ${SOURCES})
 add_dependencies(${PROJECT_NAME} ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Specify libraries to link a library or executable target against
-target_link_libraries(dynamic_planner ${catkin_LIBRARIES} ${PCL_LIBRARIES} ${OpenCV_LIBS})
+target_link_libraries(airfar_planner ${catkin_LIBRARIES} ${PCL_LIBRARIES} ${OpenCV_LIBS})
 
-install(TARGETS dynamic_planner
+install(TARGETS airfar_planner
   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}

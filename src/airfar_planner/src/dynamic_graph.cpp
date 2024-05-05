@@ -6,7 +6,7 @@
 
 
 
-#include "dynamic_planner/dynamic_graph.h"
+#include "airfar_planner/dynamic_graph.h"
 
 /***************************************************************************************/
 
@@ -165,7 +165,6 @@ void DynamicGraph::UpdateNavGraph(const NodePtrStack& new_nodes,
             this->ReduceDumperCounter(node_ptr);
         }
     }
-    DPUtil::Timer.start_time("re-evaluate trajectory edge using terrain planner");
     // re-evaluate trajectory edge using terrain planner
     if (DPUtil::IsTrajectory && cur_internav_ptr_ != NULL) {
         NodePtrStack internav_check_nodes = surround_internav_nodes_;
@@ -183,7 +182,6 @@ void DynamicGraph::UpdateNavGraph(const NodePtrStack& new_nodes,
             }   
         }     
     }
-    DPUtil::Timer.end_time("re-evaluate trajectory edge using terrain planner");
     // check-add connections to odom node with wider near nodes
     NodePtrStack codom_check_list = wide_near_nodes_;
     codom_check_list.insert(codom_check_list.end(), new_nodes.begin(), new_nodes.end());
@@ -248,7 +246,7 @@ void DynamicGraph::UpdateNavGraph(const NodePtrStack& new_nodes,
         }
     }
     // cout<<"Clear node size: "<<clear_node.size()<<endl;
-    ROS_WARN("DG: Near nodes size: %d", near_nav_nodes_.size());
+    // ROS_WARN("DG: Near nodes size: %d", near_nav_nodes_.size());
 
     // reconnect between vertical nodes
     // DPUtil::Timer.start_time("reconnect between Vertical nodes");

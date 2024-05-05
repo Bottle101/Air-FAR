@@ -5,7 +5,7 @@
  */
 
 
-#include "dynamic_planner/terrain_planner.h"
+#include "airfar_planner/terrain_planner.h"
 
 /***************************************************************************************/
 

@@ -5,7 +5,7 @@
  */
 
 
-#include "dynamic_planner/scan_handler.h"
+#include "airfar_planner/scan_handler.h"
 
 /***************************************************************************************/
 

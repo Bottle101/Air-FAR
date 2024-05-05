@@ -6,7 +6,7 @@
 
 
 
-#include "dynamic_planner/planner_visualizer.h"
+#include "airfar_planner/planner_visualizer.h"
 
 /***************************************************************************************/
 

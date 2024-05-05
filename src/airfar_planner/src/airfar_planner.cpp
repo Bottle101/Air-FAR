@@ -6,7 +6,7 @@
 
 
 
-#include "dynamic_planner/dynamic_planner.h"
+#include "airfar_planner/airfar_planner.h"
 
 /***************************************************************************************/
 
@@ -306,7 +306,7 @@ Point3D DPMaster::ProjectNavWaypoint(const Point3D& nav_waypoint, const Point3D&
 }
 
 void DPMaster::LoadROSParams() {
-  const std::string master_prefix   = "/dynamic_planner/";
+  const std::string master_prefix   = "/airfar_planner/";
   const std::string map_prefix      = master_prefix + "MapHandler/";
   const std::string scan_prefix     = master_prefix + "ScanHandler/";
   const std::string cdetect_prefix  = master_prefix + "CDetector/";
@@ -669,7 +669,7 @@ std::vector<PolygonStack> ContourGraph::multi_contour_polygons_;
 std::vector<std::vector<PointPair>> ContourGraph::multi_global_contour_;
 
 int main(int argc, char** argv){
-  ros::init(argc, argv, "dynamic_planner_node");
+  ros::init(argc, argv, "airfar_planner_node");
   DPMaster dp_node;
   dp_node.Init();
   dp_node.Loop();
