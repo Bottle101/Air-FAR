@@ -403,7 +403,9 @@ Visualization Manager:
         contour_edge: true
         corner_surf: false
         covered_nodes: true
+        goal_edge: true
         graph_node: true
+        insert_node: true
         internav_node: true
         near_node: false
         odom_edge: false
@@ -517,7 +519,7 @@ Visualization Manager:
       Marker Topic: /viz_path_topic
       Name: Path
       Namespaces:
-        {}
+        global_path: true
       Queue Size: 100
       Value: true
     - Alpha: 1
@@ -726,8 +728,12 @@ Visualization Manager:
       Name: Marker
       Namespaces:
         clear_nodes: true
+        free_goal: true
+        insert_nav_nodes: true
         last_nav_node: true
         new_nodes: true
+        original_goal: true
+        waypoint: true
       Queue Size: 100
       Value: true
     - Alpha: 1
@@ -772,7 +778,7 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 160.07070922851562
+      Distance: 55.920955657958984
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
@@ -780,17 +786,17 @@ Visualization Manager:
         Value: false
       Field of View: 0.7853981852531433
       Focal Point:
-        X: 6.886029243469238
-        Y: 0.9356277585029602
-        Z: 11.125768661499023
+        X: 15.502864837646484
+        Y: 12.2279634475708
+        Z: 11.124250411987305
       Focal Shape Fixed Size: false
       Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 1.4997966289520264
+      Pitch: 1.4947963953018188
       Target Frame: map
-      Yaw: 3.1375439167022705
+      Yaw: 4.717554092407227
     Saved: ~
 Window Geometry:
   ControlPanel:

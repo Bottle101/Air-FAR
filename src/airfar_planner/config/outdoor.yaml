@@ -45,7 +45,7 @@ Graph/terrain_inflate_size              : 5
 Graph/clear_dumper_thred                : 4
 Graph/node_finalize_thred               : 6
 Graph/RANSAC_pool_size                  : 12
-Graph/vertical_angle_thred             : 40.0  # Unit: degree
+Graph/vertical_angle_thred              : 40.0  # Unit: degree
 Graph/connect_angle_thred               : 6.0   # Unit: degree
 Graph/pos_filter_margin                 : 0.5   # Unit: meter
 Graph/dirs_filter_margin                : 10.0  # Unit: degree
@@ -74,7 +74,7 @@ GPlanner/clear_inflate_size             : 3
 ContourGraph/around_distance            : 0.75
 ContourGraph/pillar_perimeter_dist      : 3.0  # Unit: meter
 ContourGraph/KDTree_num                 : 8
-ContourGraph/KDTree_neighbor_size       : 3
+ContourGraph/KDTree_neighbor_size       : 2
 ContourGraph/KNN_search_radius          : 2.0  # Unit: meter
 ContourGraph/wall_insert_factor         : 0.6 
 
