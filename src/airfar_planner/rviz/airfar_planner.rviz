@@ -398,19 +398,15 @@ Visualization Manager:
       Marker Topic: /viz_graph_topic
       Name: GlobalGraph
       Namespaces:
-        bottom_contour: true
         contour_align: false
         contour_edge: true
         corner_surf: false
         covered_nodes: true
-        goal_edge: true
         graph_node: true
-        insert_node: true
         internav_node: true
         near_node: false
         odom_edge: false
         surf_direct: false
-        top_contour: true
         unfinal_node: false
       Queue Size: 1
       Value: true
@@ -519,7 +515,7 @@ Visualization Manager:
       Marker Topic: /viz_path_topic
       Name: Path
       Namespaces:
-        global_path: true
+        {}
       Queue Size: 100
       Value: true
     - Alpha: 1
@@ -727,13 +723,8 @@ Visualization Manager:
       Marker Topic: /viz_node_topic
       Name: Marker
       Namespaces:
-        clear_nodes: true
-        free_goal: true
-        insert_nav_nodes: true
         last_nav_node: true
         new_nodes: true
-        original_goal: true
-        waypoint: true
       Queue Size: 100
       Value: true
     - Alpha: 1
@@ -778,7 +769,7 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 55.920955657958984
+      Distance: 52.008949279785156
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
@@ -786,17 +777,17 @@ Visualization Manager:
         Value: false
       Field of View: 0.7853981852531433
       Focal Point:
-        X: 15.502864837646484
-        Y: 12.2279634475708
-        Z: 11.124250411987305
+        X: 9.826027870178223
+        Y: 4.164547443389893
+        Z: 10.609159469604492
       Focal Shape Fixed Size: false
       Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 1.4947963953018188
+      Pitch: 1.424796462059021
       Target Frame: map
-      Yaw: 4.717554092407227
+      Yaw: 3.14253830909729
     Saved: ~
 Window Geometry:
   ControlPanel:
