@@ -45,7 +45,7 @@ Graph/terrain_inflate_size              : 5
 Graph/clear_dumper_thred                : 4
 Graph/node_finalize_thred               : 6
 Graph/RANSAC_pool_size                  : 12
-Graphj/vertical_angle_thred             : 40.0  # Unit: degree
+Graph/vertical_angle_thred             : 40.0  # Unit: degree
 Graph/connect_angle_thred               : 6.0   # Unit: degree
 Graph/pos_filter_margin                 : 0.5   # Unit: meter
 Graph/dirs_filter_margin                : 10.0  # Unit: degree

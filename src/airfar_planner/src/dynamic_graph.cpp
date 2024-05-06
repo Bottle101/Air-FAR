@@ -373,6 +373,10 @@ bool DynamicGraph::IsValidConnect(const NavNodePtr& node_ptr1,
         }
     }   
 
+    if (!DynamicGraph::IsConnectInVerticalConstrain(node_ptr1, node_ptr2)) {
+        return false;
+    }
+
     _is_merge = false;
     /* check contour connection from node1 to node2 */
     bool is_connect = false;

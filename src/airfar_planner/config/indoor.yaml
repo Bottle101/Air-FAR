@@ -74,7 +74,7 @@ GPlanner/clear_inflate_size             : 3
 ContourGraph/around_distance            : 0.75
 ContourGraph/pillar_perimeter_dist      : 3.0  # Unit: meter
 ContourGraph/KDTree_num                 : 8
-ContourGraph/KDTree_neighbor_size       : 3
+ContourGraph/KDTree_neighbor_size       : 2
 ContourGraph/KNN_search_radius          : 2.0  # Unit: meter
 ContourGraph/wall_insert_factor         : 0.6 
 

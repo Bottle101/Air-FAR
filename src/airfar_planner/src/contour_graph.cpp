@@ -710,6 +710,8 @@ void ContourGraph::BuildKDTreeOnContourGraph(const CTNodeStack& contour_graph, c
         contour_mat.at<float>(i, 0) = contour_graph[i]->position.x;
         contour_mat.at<float>(i, 1) = contour_graph[i]->position.y;
     }
+    if (contour_mat.empty()) return;
+
     multi_contour_graph_kdtree_[layer_id].reset(new cv::flann::Index(contour_mat, *indexParams));
     is_kdtree_built_= true;
     // TestContourGraph(layer_id);
@@ -754,7 +756,7 @@ void ContourGraph::ConnectVerticalEdges(const int& layer_id) {
             if (neighbor_ptr == NULL) continue;
             // ROS_WARN("neighbor_ptr is not NULL");
             if (node_ptr->free_direct == NodeFreeDirect::PILLAR || neighbor_ptr->free_direct == NodeFreeDirect::PILLAR) continue;
-            if (node_ptr->free_direct == neighbor_ptr->free_direct && (node_ptr->position - neighbor_ptr->position).norm() < 2.0) {
+            if (node_ptr->free_direct == neighbor_ptr->free_direct && (node_ptr->position - neighbor_ptr->position).norm() < 1.5) {
                 Point3D topo_dir = node_ptr->surf_dirs.first + node_ptr->surf_dirs.second;
                 topo_dir.z = 0.0;
                 if (topo_dir.norm() < DPUtil::kEpsilon) continue;
