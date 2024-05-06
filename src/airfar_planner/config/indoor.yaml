@@ -1,6 +1,6 @@
 # Dynamic Planner Default Params
 main_run_freq                           : 15.0
-voxel_dim                               : 0.2   # Unit: meter
+voxel_dim                               : 0.15   # Unit: meter
 robot_dim                               : 1.6   # Unit: meter
 vehicle_height                          : 1.6   # Unit: meter
 sensor_range                            : 20.0  # Unit: meter
@@ -34,7 +34,7 @@ Util/terrain_free_Z                     : 0.25
 Util/dyosb_update_thred                 : 4
 Util/new_point_counter                  : 3
 Util/inflate_counter                    : 1
-Util/dynamic_obs_dacay_time             : 10.0
+Util/dynamic_obs_dacay_time             : 1.0
 
 # Dynamic Graph Params
 Graph/node_near_dist                    : 1.5   # Unit: meter
@@ -54,7 +54,7 @@ Graph/dirs_filter_margin                : 10.0  # Unit: degree
 CDetector/resize_ratio                  : 2.0
 CDetector/img_blur_size                 : 7.0
 CDetector/filter_count_value            : 3
-CDetector/approx_eps                    : 0.003 # 0.005 is pretty good, if the environment is really complex (near_node number > 1000), you can try 0.01
+CDetector/approx_eps                    : 0.005 # 0.005 is pretty good, if the environment is really complex (near_node number > 1000), you can try 0.01
 CDetector/is_inflate_image              : true
 CDetector/is_save_img                   : false
 CDetector/img_folder_path               : /home/bottle/hbt_ws/AirFar_dev/data/contour_campus/revised/
