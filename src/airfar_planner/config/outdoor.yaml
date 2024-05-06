@@ -5,7 +5,7 @@ robot_dim                               : 2.4   # Unit: meter
 vehicle_height                          : 1.6   # Unit: meter
 sensor_range                            : 30.0  # Unit: meter
 reproject_dist                          : 5.0   # Unit: meter
-layer_resoltion                         : 1.0
+layer_resoltion                         : 1.2
 neighbor_layer_num                      : 1
 visualize_ratio                         : 0.75
 is_inter_navpoint                       : true
@@ -54,7 +54,7 @@ Graph/dirs_filter_margin                : 10.0  # Unit: degree
 CDetector/resize_ratio                  : 2.0
 CDetector/img_blur_size                 : 7.0
 CDetector/filter_count_value            : 3
-CDetector/approx_eps                    : 0.005 # 0.005 is pretty good, if the environment is really complex (near_node number > 1000), you can try 0.01
+CDetector/approx_eps                    : 0.003 # 0.005 is pretty good, if the environment is really complex (near_node number > 1000), you can try 0.01
 CDetector/is_inflate_image              : true
 CDetector/is_save_img                   : false
 CDetector/img_folder_path               : /home/bottle/hbt_ws/AirFar_dev/data/contour_campus/revised/
