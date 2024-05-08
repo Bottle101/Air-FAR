@@ -248,10 +248,10 @@ void DPVisualizer::VizGraph(const NodePtrStack& graph) {
                 odom_edge_marker.points.push_back(p1);
                 odom_edge_marker.points.push_back(p2);
             } else {
-                if (cnode->is_wall_insert || node_ptr->is_wall_insert) {
+                // if (cnode->is_wall_insert || node_ptr->is_wall_insert) {
                 edge_marker.points.push_back(p1);
                 edge_marker.points.push_back(p2);                    
-                }                
+                // }                
             }
         }
         // contour edges
