@@ -1,4 +1,5 @@
-Air-FAR is a robust framework for 3D path planning that leverages a visibility graph updated dynamically for real-time replanning (<30ms for 300m trajectory). This planner represents the environment using 3D polyhedrons and employs a novel heuristic, multi-layer visibility graph construction algorithm to sidestep dimensional catastrophes. Its path planning guarantees asymptotic optimality through a combination of divide-and-conquer based path pruning and heuristic random sampling techniques. Full technical details will be disclosed in an upcoming paper.
+Air-FAR is a robust framework for 3D path planning that leverages a visibility graph updated dynamically for real-time replanning (<30ms for 300m trajectory). This planner represents the environment using 3D polyhedrons and employs a novel heuristic, multi-layer visibility graph construction algorithm to sidestep dimensional catastrophes. Its path planning guarantees asymptotic optimality through a combination of divide-and-conquer based path pruning and heuristic random sampling techniques. The planner is capable of handling both known and unknown environments. In a known environment, paths are planned based on a prior map. In an unknown environment, multiple paths are attempted to guide the vehicle to goal based on the environment observed during the navigation. 
+Full technical details will be disclosed in an upcoming paper.
 
 
 <p align="center">
@@ -7,7 +8,7 @@ Air-FAR is a robust framework for 3D path planning that leverages a visibility g
 
 ## Usage
 
-The repository has been tested in Ubuntu 20.04 with ROS Noetic. Follow instructions in [Autonomous Exploration Development Environment](https://www.far-planner.com/) to setup the development environment. Make sure to checkout the branch that matches the computer setup, compile, and download the simulation environments.
+The repository has been tested in Ubuntu 20.04 with ROS Noetic. Follow instructions in [Aerial Autonomy Development Environment](https://www.far-planner.com/) to setup the development environment. Make sure to checkout the branch that matches the computer setup, compile, and download the simulation environments.
 
 To setup FAR Planner, clone the repository.
 ```
