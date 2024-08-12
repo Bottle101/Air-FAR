@@ -30,19 +30,24 @@ void ContourGraph::Init(const ContourGraphParams& params) {
 void ContourGraph::UpdateContourGraph(const NavNodePtr& odom_node_ptr,
                                       const int& layer_idx,
                                       const std::vector<std::vector<Point3D>>& filtered_contours) {
+    // ROS_WARN("00000");
     if (filtered_contours.empty()) return;
     // ROS_WARN("odom node layer id: %d", odom_node_ptr->layer_id);
     // ROS_WARN("odom position: %f, %f, %f", odom_node_ptr->position.x, odom_node_ptr->position.y, odom_node_ptr->position.z);
     odom_node_ptr_ = odom_node_ptr;
+    // ROS_WARN("aaaaa");
     this->ClearContourGraph(layer_idx);
+    // ROS_WARN("11111");
     for (const auto& poly : filtered_contours) {
         PolygonPtr new_poly_ptr = NULL;
         this->CreatePolygon(poly, layer_idx, new_poly_ptr);
         this->AddPolyToContourPolygon(new_poly_ptr, layer_idx);
     }
+    // ROS_WARN("22222");
     if (layer_idx == odom_node_ptr_->layer_id) {
         ContourGraph::UpdateOdomFreePosition(odom_node_ptr_, DPUtil::free_odom_p);
     }
+    // ROS_WARN("33333");
     for (const auto& poly_ptr : ContourGraph::multi_contour_polygons_[layer_idx]) {
         CTNodePtr new_ctnode_ptr = NULL;
         if (poly_ptr->is_pillar) {
@@ -79,8 +84,11 @@ void ContourGraph::UpdateContourGraph(const NavNodePtr& odom_node_ptr,
             }
         }
     }
+    // ROS_WARN("44444");
     this->BuildKDTreeOnContourGraph(ContourGraph::multi_contour_graph_[layer_idx], layer_idx);
+    // ROS_WARN("55555");
     this->AnalysisSurfAngleAndConvexity(ContourGraph::multi_contour_graph_[layer_idx]);
+    // ROS_WARN("66666");
 }
 
 void ContourGraph::MatchContourWithNavGraph(const NodePtrStack& nav_graph, 
@@ -94,6 +102,12 @@ void ContourGraph::MatchContourWithNavGraph(const NodePtrStack& nav_graph,
     }
     new_convex_vertices.clear();
     for (const int& layer_id : cur_layer_idxs) {
+        // ROS_WARN("ContourGraph::multi_contour_graph_[layer_id] size: %d", ContourGraph::multi_contour_graph_[layer_id].size());
+        if (int(ContourGraph::multi_contour_graph_[layer_id].size()) < 2) {
+            ContourGraph::multi_contour_graph_[layer_id].clear();
+            continue;
+        }
+        // ROS_WARN("ContourGraph::multi_contour_graph_[layer_id] size: %d", ContourGraph::multi_contour_graph_[layer_id].size());
         for (const auto& ctnode_ptr : ContourGraph::multi_contour_graph_[layer_id]) {
             ctnode_ptr->is_global_match = false;
             ctnode_ptr->nav_node_id = 0; // note: 0 is the id of odom node 
@@ -705,7 +719,9 @@ ConnectPair ContourGraph::ReprojectEdge(const NavNodePtr& node_ptr1, const NavNo
 }
 
 void ContourGraph::BuildKDTreeOnContourGraph(const CTNodeStack& contour_graph, const int& layer_id) {
+    if (contour_graph.size() < ctgraph_params_.knn_search_num_ + 1) return;
     cv::Mat contour_mat(contour_graph.size(), 2, CV_32FC1);
+    // ROS_WARN("contour_graph size: %d", contour_graph.size());
     for (size_t i = 0; i < contour_graph.size(); ++i) {
         contour_mat.at<float>(i, 0) = contour_graph[i]->position.x;
         contour_mat.at<float>(i, 1) = contour_graph[i]->position.y;
@@ -722,6 +738,7 @@ void ContourGraph::SearchKNN(const CTNodePtr& node, std::vector<int>& indices, c
     node_mat.at<float>(0, 0) = node->position.x;
     node_mat.at<float>(0, 1) = node->position.y;
     cv::Mat indices_mat, dists;
+    // ROS_WARN("multi_contour_graph_kdtree_[layer_id] size: %d", multi_contour_graph_kdtree_[layer_id]->);
     multi_contour_graph_kdtree_[layer_id]->knnSearch(node_mat, indices_mat, dists, ctgraph_params_.knn_search_num_);
     // Transfer the results back
     for (int i = 0; i < indices_mat.rows; i++) {
@@ -747,6 +764,10 @@ void ContourGraph::SearchKNN(const CTNodePtr& node, std::vector<int>& indices, c
 void ContourGraph::ConnectVerticalEdges(const int& layer_id) {
     for (const auto& node_ptr : multi_contour_graph_[layer_id]) {
         std::vector<int> indices;
+        if (multi_contour_graph_kdtree_[layer_id+1] == NULL) {
+            // ROS_ERROR("ConnectVerticalEdges: KDTree is not built.");
+            return;
+        }
         SearchKNN(node_ptr, indices, layer_id+1);
         // ROS_WARN("indices size: %d", indices.empty());
 

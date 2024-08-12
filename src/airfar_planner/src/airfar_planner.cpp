@@ -141,13 +141,19 @@ void DPMaster::Loop() {
       for (const int& layer_idx : cur_layer_idxs_) {
         std::vector<PointStack> realworld_contour;
         map_handler_.GetSurroundObsCloud(layer_cloud_ptr, layer_idx);
+        // ROS_ERROR("layer_cloud_ptr size: %ld", layer_cloud_ptr->size());
         // DPUtil::Timer.start_time("Image_operation");        
         contour_detector_.BuildTerrianImgAndExtractContour(odom_node_ptr_, DPUtil::layerIdx2Height_[layer_idx], layer_cloud_ptr, realworld_contour);
+        
         // DPUtil::Timer.end_time("Image_operation");
-        if (realworld_contour.size() == 0) {
+        if (realworld_contour.size() < 2) {
           ROS_WARN("DPMaster: No contour detected in layer %d", layer_idx);
           continue;
         }
+        if (layer_idx >= ContourGraph::multi_contour_graph_.size() || layer_idx >= ContourGraph::multi_contour_polygons_.size()) {
+          continue;
+        }
+        // ROS_WARN("realworld_contour size: %ld", realworld_contour.size());
         contour_graph_.UpdateContourGraph(odom_node_ptr_, layer_idx, realworld_contour);
         if (layer_idx != cur_layer_idxs_.front()) {
           contour_graph_.ConnectVerticalEdges(layer_idx-1);
@@ -155,6 +161,13 @@ void DPMaster::Loop() {
       }
 
       wide_nav_graph_ = graph_manager_.GetWideNavGraph();
+      ROS_WARN("wide_nav_graph_ size: %ld", wide_nav_graph_.size());
+      ROS_WARN("new_ctnodes_ size: %ld", new_ctnodes_.size());
+      if (new_ctnodes_.empty()) {
+        ROS_WARN("DPMaster: No new contour nodes detected.");
+        loop_rate.sleep();
+        continue;
+      }
       contour_graph_.MatchContourWithNavGraph(wide_nav_graph_, cur_layer_idxs_, new_ctnodes_);
 
       // DPUtil::ConvertCTNodeStackToPCL(new_ctnodes_, new_vertices_ptr_);
@@ -248,7 +261,6 @@ void DPMaster::Loop() {
       std::cout << "DPMaster: Graph planning finished." << std::endl;
 
       planner_viz_.VizNodes(graph_planner_.insert_nav_nodes, "insert_nav_nodes", VizColor::GREEN);
-      
       // Viz Navigation Graph
       // planner_viz_.VizPoint3D(DPUtil::free_odom_p, "free_odom_position", VizColor::ORANGE, 1.0);
       nav_graph_ = graph_planner_.GetNavGraph();
@@ -386,7 +398,7 @@ void DPMaster::LoadROSParams() {
   // convert to radians
   DPUtil::worldFrameId    = master_params_.world_frame;
   DPUtil::kVizRatio       = master_params_.viz_ratio;
-  DPUtil::kTolerZ         = map_params_.ceil_height * (master_params_.neighbor_layers + 0.5);
+  DPUtil::kTolerZ         = map_params_.ceil_height * (master_params_.neighbor_layers + 1.5);
   DPUtil::kCellLength     = map_params_.ceil_length;
   DPUtil::kAcceptAlign    = DPUtil::kAcceptAlign / 180.0 * M_PI;
   DPUtil::kAngleNoise     = DPUtil::kAngleNoise / 180.0 * M_PI; 
@@ -435,20 +447,20 @@ void DPMaster::OdomCallBack(const nav_msgs::OdometryConstPtr& msg) {
   std::string odom_frame = msg->header.frame_id;
   tf::Pose tf_odom_pose;
   tf::poseMsgToTF(msg->pose.pose, tf_odom_pose);
-  if (!DPUtil::IsSameFrameID(odom_frame, master_params_.world_frame)) {
-    ROS_WARN_COND(!is_odom_init_,"DPMaster: odom frame does NOT match with world frame!");
-    tf::StampedTransform odom_to_world_tf_stamp;
-    try
-    {
-      tf_listener_->waitForTransform(master_params_.world_frame, odom_frame, ros::Time(0), ros::Duration(1.0));
-      tf_listener_->lookupTransform(master_params_.world_frame, odom_frame, ros::Time(0), odom_to_world_tf_stamp);
-      tf_odom_pose = odom_to_world_tf_stamp * tf_odom_pose;
-    }
-    catch (tf::TransformException ex){
-      ROS_ERROR("Tracking odom TF lookup: %s",ex.what());
-      return;
-    }
-  }
+  // if (!DPUtil::IsSameFrameID(odom_frame, master_params_.world_frame)) {
+  //   ROS_WARN_COND(!is_odom_init_,"DPMaster: odom frame does NOT match with world frame!");
+  //   tf::StampedTransform odom_to_world_tf_stamp;
+  //   try
+  //   {
+  //     tf_listener_->waitForTransform(master_params_.world_frame, odom_frame, ros::Time(0), ros::Duration(1.0));
+  //     tf_listener_->lookupTransform(master_params_.world_frame, odom_frame, ros::Time(0), odom_to_world_tf_stamp);
+  //     tf_odom_pose = odom_to_world_tf_stamp * tf_odom_pose;
+  //   }
+  //   catch (tf::TransformException ex){
+  //     ROS_ERROR("Tracking odom TF lookup: %s",ex.what());
+  //     return;
+  //   }
+  // }
   robot_pos_.x = tf_odom_pose.getOrigin().getX(); 
   robot_pos_.y = tf_odom_pose.getOrigin().getY();
   robot_pos_.z = tf_odom_pose.getOrigin().getZ();
@@ -480,21 +492,21 @@ void DPMaster::PrcocessCloud(const sensor_msgs::PointCloud2ConstPtr& pc,
   // transform cloud frame
   std::string cloud_frame = pc->header.frame_id;
   DPUtil::RemoveNanInfPoints(cloudOut);
-  if (!DPUtil::IsSameFrameID(cloud_frame, master_params_.world_frame)) {
-    ROS_WARN_ONCE("DPMaster: cloud frame does NOT match with world frame!");
-    try
-    {
-      DPUtil::TransformPCLFrame(cloud_frame, 
-                                master_params_.world_frame, 
-                                tf_listener_,
-                                cloudOut);
-    }
-    catch(tf::TransformException ex)
-    {
-      ROS_ERROR("Tracking cloud TF lookup: %s",ex.what());
-      return;
-    }
-  }
+  // if (!DPUtil::IsSameFrameID(cloud_frame, master_params_.world_frame)) {
+  //   ROS_WARN_ONCE("DPMaster: cloud frame does NOT match with world frame!");
+  //   try
+  //   {
+  //     DPUtil::TransformPCLFrame(cloud_frame, 
+  //                               master_params_.world_frame, 
+  //                               tf_listener_,
+  //                               cloudOut);
+  //   }
+  //   catch(tf::TransformException ex)
+  //   {
+  //     ROS_ERROR("Tracking cloud TF lookup: %s",ex.what());
+  //     return;
+  //   }
+  // }
     planner_viz_.VizPointCloud(ground_pc_debug_,  cloudOut);  
   if (is_crop_cloud) {
     const Point3D crop_size(master_params_.sensor_range, master_params_.sensor_range, DPUtil::kTolerZ);

@@ -156,6 +156,7 @@ void DPVisualizer::VizContourGraph(const std::vector<CTNodeStack>& contour_graph
         global_contour_marker.points.push_back(p2);
     };
     for (const int& layer_id : cur_layer_idxs) {
+        if (int(contour_graph[layer_id].size()) < 2) continue;  
         for (const auto& ctnode : contour_graph[layer_id]) {
             if (ctnode == NULL) {
                 ROS_ERROR("Viz: contour node is NULL.");
