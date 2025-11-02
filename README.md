@@ -48,6 +48,19 @@ The default configuration works well in most cases, if you are using **outdoor**
 <arg name="config_file" default="outdoor"/>
 ```
 
+## Citations
+If you find our work useful, please consider citing:
+```
+@inproceedings{he2025air,
+  title={Air-FAR: Fast and Adaptable Routing for Aerial Navigation in Large-scale Complex Unknown Environments},
+  author={He, Botao and Chen, Guofei and Fermuller, Cornelia and Aloimonos, Yiannis and Zhang, Ji},
+  booktitle={2025 IEEE International Conference on Robotics and Automation (ICRA)},
+  pages={1--7},
+  year={2025},
+  organization={IEEE}
+}
+```
+
 ## Author
 
 [Botao He](https://github.com/Bottle101) (hebotao101@gmail.com)
